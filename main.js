@@ -11,10 +11,10 @@ function main() {
 
   const fov = 75;
   const aspect = 2;  // the canvas default
-  const near = 0.1;
+  const near = 1;
   const far = 10000;
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.set(-200, 0 , 200);
+  camera.position.set(0, 300, -400);
 
   // MUOVI A PIACIMENTO
   const controls = new OrbitControls(camera, canvas);
@@ -28,7 +28,7 @@ function main() {
   }
   
 
-
+//###################################################### S C E N E ##################################################
 
   const scene = new THREE.Scene();
 
@@ -40,15 +40,45 @@ function main() {
     scene.add( directionalLight );
   }
 
-  /*
-  var grounddepth =1
-  const groundGeometry = new THREE.BoxGeometry(500, 500,grounddepth);
-  const groundMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
-  const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
-  groundMesh.rotation.x = Math.PI * -.5;
+//###################################################### F I E L D ##################################################
+
+
+const groundwidth = 10000;  
+const groundheight = 10000;  
+const grounddepth = 1;
+const ground = new THREE.BoxGeometry(groundwidth,groundheight,grounddepth);
+const groundMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
+const groundMesh = new THREE.Mesh(ground,groundMaterial);
+groundMesh.position.set(0,0,groundheight*2/4.5);
+groundMesh.rotation.x = radians(-90);
+scene.add(groundMesh);
+
+
+//###################################################### T R A C K ##################################################
+
+const trackwidth=  100;  
+const trackheight = 10000; 
+const trackdepth =  1.0; 
+
+const track= new THREE.BoxGeometry(trackwidth, trackheight, trackdepth);
+const trackMaterial = new THREE.MeshPhongMaterial({color: 0x008566});
+const trackMaterial2 = new THREE.MeshPhongMaterial({color: 0xE76060});
+const trackMesh = new THREE.Mesh(track,trackMaterial);
+const trackMesh2 = new THREE.Mesh(track,trackMaterial2);
+const trackMesh3 = new THREE.Mesh(track,trackMaterial2);
+trackMesh.position.set(0,grounddepth+trackdepth,groundheight*2/4.5);
+trackMesh2.position.set(trackwidth,grounddepth+trackdepth,groundheight*2/4.5);
+trackMesh3.position.set(-trackwidth,grounddepth+trackdepth,groundheight*2/4.5);
+trackMesh.rotation.x = radians(-90);
+trackMesh2.rotation.x = radians(-90);
+trackMesh3.rotation.x = radians(-90);
+scene.add(trackMesh2);
+scene.add(trackMesh);
+scene.add(trackMesh3)
+
+
   
-  groundMesh.receiveShadow = true;
-  scene.add(groundMesh); 
+ 
 
   
 
@@ -56,7 +86,7 @@ function main() {
 
   //streetMesh.rotation.z =  Math.PI * -.5;
 
-
+/*
 const loader = new FBXLoader();
 
 loader.load( './models/Silo.fbx', function ( Object3D ) {
@@ -78,10 +108,105 @@ Plot.add( Object3D );
         fbx.position.set(0,0,grounddepth);
         Plot.add(fbx);
       })
+
+
+//#################################################### O B S T A C L E ########################################################
+*/
+var obstacles = [];
+
+
+
+function createObject(interval){
+  var obstacle = new THREE.Object3D();
+  var ntrack = Math.floor(Math.random() * (3));
+
+  scene.add(obstacle);
+  obstacles.push(obstacle);
+
+  
+  if (ntrack==0){
+    obstacle.position.x = -100;
+  }
+  if (ntrack==1){
+    obstacle.position.x = 0;
+  }
+  if (ntrack==2){
+    obstacle.position.x= 100;
+  }
+  
+  obstacle.position.z = 10000;
+  
+  const railwidth =  110;  
+  const railheight =  10;  
+  const raildepth = 2;  
+
+  const rail= new THREE.BoxGeometry(railwidth, railheight, raildepth);
+  const railMaterial = new THREE.MeshPhongMaterial({color: 0xFFFFFF});
+  const railMesh = new THREE.Mesh(rail, railMaterial);
+  const railMesh2 = new THREE.Mesh(rail, railMaterial);
+  railMesh.position.set(0,railwidth/2-10,0);
+  obstacle.add(railMesh);
+
+  const postwidth =  10;  
+  const postheight =  50;  
+  const postdepth = 2;  
+
+  const post= new THREE.BoxGeometry(postwidth, postheight, postdepth);
+  const postMaterial = new THREE.MeshPhongMaterial({color: 0xFFFFFF});
+  const postMesh = new THREE.Mesh(post, postMaterial);
+  const postMesh2 = new THREE.Mesh(post, postMaterial);
+  postMesh.position.set(-railwidth/2+10,-postheight/2+railheight/2,-postdepth);
+  postMesh2.position.set(railwidth/2-10,-postheight/2+railheight/2,-postdepth);
+  railMesh.add(postMesh);
+  railMesh.add(postMesh2);
+
+
+  const brailwidth =  100;  
+  const brailheight =  2;  
+  const braildepth = 10;  
+
+  const brail= new THREE.BoxGeometry(brailwidth, brailheight, braildepth);
+  const brailMaterial = new THREE.MeshPhongMaterial({color: 0xFFFFFF});
+  const brailMesh = new THREE.Mesh(brail, brailMaterial);
+  const brailMesh2 = new THREE.Mesh(brail, brailMaterial);
+  brailMesh.position.set(0,-railwidth/2+braildepth+railheight/2+railwidth/2-10,-braildepth/2);
+  obstacle.add(brailMesh);
+
+  const bpostwidth =  10;  
+  const bpostheight =  2;  
+  const bpostdepth = 50;  
+
+  const bpost= new THREE.BoxGeometry(bpostwidth, bpostheight, bpostdepth);
+  const bpostMaterial = new THREE.MeshPhongMaterial({color: 0xFFFFFF});
+  const bpostMesh = new THREE.Mesh(bpost, bpostMaterial);
+  const bpostMesh2 = new THREE.Mesh(bpost, bpostMaterial);
+  bpostMesh.position.set(bpostdepth*2/2-bpostwidth/2,0,-bpostdepth/2);
+  bpostMesh2.position.set(-bpostdepth*2/2+bpostwidth/2,0,-bpostdepth/2);
+  brailMesh.add(bpostMesh);
+  brailMesh.add(bpostMesh2);
+
+
+  obstacle.rotation.y = radians(180);
+  createjs.Tween.get(obstacle.position).to({z:-500}, interval).call(function(){scene.remove(obstacle);});
+}
+
+/*
+spawn_interval = 
+speed_interval = 
+
+upon timer 
+spawn_interval(1){
+  createobject(speed_interval)
+}
 */
 
+function set(){
+  var obs = 20;
+}
 
-//##############HUMAN##############HUMAN##############HUMAN##############HUMAN##############HUMAN##############HUMAN##############
+
+
+//###################################################### H U M A N ###########################################################
 
 const human = new THREE.Object3D();
   
@@ -438,9 +563,14 @@ const headMesh2 = new THREE.Mesh(head, headMaterial);
 headMesh.position.set(0,neckheight/2+headRadius/2,0);
 neckMesh.add(headMesh);
 
+human.position.set(0,radius+height+heightTibia+heightFoot1+2.5+grounddepth+trackdepth,0);
+
 
 //###################################################### E V E N T - L I S T E N E R ##################################################
+//======= HUMAN POS =======//
+var pos = 0;
 var jumping = false;
+var moving = false;
 
 
 document.addEventListener('keydown', function(event) {
@@ -451,8 +581,29 @@ document.addEventListener('keydown', function(event) {
       }
       
   }
+
+  if(event.keyCode == 65) {
+    if (pos > -1 && moving == false){
+      moving = true;
+      pos-=1;
+      left();
+    }
+  }
+  if(event.keyCode == 68 && moving == false ) {
+      if (pos < 1 && moving == false){
+        moving = true;
+        pos+=1;
+        right();
+
+      }
+  
+  }
 });
 //###################################################### A N I M A T I O N S ##################################################
+
+
+
+
 
 //-----------------------------
 //----------------RUN----------
@@ -496,7 +647,31 @@ function jump(){
     createjs.Tween.get(shoulderMesh2.rotation).to({x:radians(-90)}, jinterval/2).to({x:radians(0)},jinterval/2).call(function(){jumping=false});
 
 }
+//-----------------------------
+//------------LEFT-------------
+//-----------------------------
 
+function left(){
+  var interval = 200;
+  createjs.Tween.get(waistMesh.position).to({x:waistMesh.position.x + 100}, interval).call(function(){moving=false;});
+  createjs.Tween.get(waistMesh.rotation).to({y:radians(45)}, interval/2).to({y:radians(0)},interval/2);
+  createjs.Tween.get(torso.rotation).to({z:radians(45)}, interval/2).to({z:radians(0)},interval/2);
+}
+
+//-----------------------------a
+//------------RIGHT-------------
+//-----------------------------
+
+function right(){
+  var interval = 200;
+  createjs.Tween.get(waistMesh.position).to({x:waistMesh.position.x - 100}, interval).call(function(){moving=false;});
+  createjs.Tween.get(waistMesh.rotation).to({y:radians(-45)}, interval/2).to({y:radians(0)},interval/2);
+  createjs.Tween.get(torso.rotation).to({z:radians(-45)}, interval/2).to({z:radians(0)},interval/2);
+}
+
+//-----------------------------
+//------------DEAD-------------
+//-----------------------------
 
 function dead(){
   var interval = 500;
@@ -547,11 +722,18 @@ function dead(){
 
 
 
-
-
-
 //################################################## FINE A N I M A T I O N S ##################################################
-  //##############################################
+//####### TIMERS #############//////
+var velocity = 5000;
+
+var callSpawn = setInterval(function(){
+  createObject(velocity);
+  },1000);
+   
+  
+
+
+//################################################### R E N D E R I N G #//###################################################
   function resizeRendererToDisplaySize(renderer) {
     const canvas = renderer.domElement;
     const width = canvas.clientWidth;
@@ -563,8 +745,11 @@ function dead(){
     return needResize;
   }
 
+
+
   function render(time) {
     time *= 0.001;
+
 
    
     if (resizeRendererToDisplaySize(renderer)) {
