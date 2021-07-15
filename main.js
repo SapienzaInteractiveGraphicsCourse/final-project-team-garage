@@ -112,17 +112,16 @@ Plot.add( Object3D );
 
 //#################################################### O B S T A C L E ########################################################
 */
-var obstacles = [];
+var obstacles = []
+
 
 
 
 function createObject(interval){
   var obstacle = new THREE.Object3D();
   var ntrack = Math.floor(Math.random() * (3));
-
   scene.add(obstacle);
   obstacles.push(obstacle);
-
   
   if (ntrack==0){
     obstacle.position.x = -100;
@@ -184,31 +183,39 @@ function createObject(interval){
   bpostMesh2.position.set(-bpostdepth*2/2+bpostwidth/2,0,-bpostdepth/2);
   brailMesh.add(bpostMesh);
   brailMesh.add(bpostMesh2);
-
-
   obstacle.rotation.y = radians(180);
+
+  
   createjs.Tween.get(obstacle.position).to({z:-500}, interval).call(function(){scene.remove(obstacle);});
 }
 
-/*
-spawn_interval = 
-speed_interval = 
+  
 
-upon timer 
-spawn_interval(1){
-  createobject(speed_interval)
+function dist3d (v1, v2 )
+{
+    var dx = v1.x - v2.x;
+    var dy = v1.y - v2.y;
+    var dz = v1.z - v2.z;
+    return Math.sqrt( dx * dx + dy * dy + dz * dz );
 }
-*/
 
-function set(){
-  var obs = 20;
+
+function checkCollisions(){
+  for (var i = 0; i < obstacles.length ; i++){
+      if ( Math.abs(obstacles[i].position.x - waistMesh.position.x )<50 && jumping == false && Math.abs(obstacles[i].position.z)<150){
+          console.log("hit");
+      }
+  }
 }
+
+
 
 
 
 //###################################################### H U M A N ###########################################################
 
 const human = new THREE.Object3D();
+
   
 scene.add(human);
 
@@ -566,6 +573,9 @@ neckMesh.add(headMesh);
 human.position.set(0,radius+height+heightTibia+heightFoot1+2.5+grounddepth+trackdepth,0);
 
 
+
+
+
 //###################################################### E V E N T - L I S T E N E R ##################################################
 //======= HUMAN POS =======//
 var pos = 0;
@@ -579,11 +589,12 @@ document.addEventListener('keydown', function(event) {
         jumping = true;
         jump();
       }
-      
+  
   }
 
   if(event.keyCode == 65) {
     if (pos > -1 && moving == false){
+
       moving = true;
       pos-=1;
       left();
@@ -591,6 +602,7 @@ document.addEventListener('keydown', function(event) {
   }
   if(event.keyCode == 68 && moving == false ) {
       if (pos < 1 && moving == false){
+       
         moving = true;
         pos+=1;
         right();
@@ -626,11 +638,7 @@ function run(){
     //controls
 }
 
-
-
-
 run()
-
 
 //-----------------------------
 //------------JUMP-------------
@@ -638,8 +646,9 @@ run()
 
 
 function jump(){
-    var jinterval = 1000;
-    createjs.Tween.get(hipsMesh.rotation).to({x:radians(-90)}, jinterval/2).to({x:radians(0)},jinterval/2);
+    var jinterval = 600
+    createjs.Tween.get(hipsMesh.rotation).to({x:radians(-120)}, jinterval/2).to({x:radians(0)},jinterval/2);
+    createjs.Tween.get(hipsMesh2.rotation).to({x:radians(90)}, jinterval/2).to({x:radians(0)},jinterval/2);
     createjs.Tween.get(waistMesh.position).to({y:100}, jinterval/2).to({y:0},jinterval/2);
     createjs.Tween.get(kneeMesh2.rotation).to({x:radians(120)}, jinterval/2).to({x:radians(0)},jinterval/2);
     createjs.Tween.get(torso.rotation).to({x:radians(45)}, jinterval/2).to({x:radians(0)},jinterval/2);
@@ -693,34 +702,7 @@ function dead(){
   createjs.Tween.get(waistMesh.position,{override:true}).to({y:-28}, interval/2);
   createjs.Tween.get(kneeMesh.rotation,{override:true}).to({x:radians(120)}, interval/2);
   createjs.Tween.get(kneeMesh2.rotation,{override:true}).to({x:radians(120)}, interval/2);
-
-  
-
-  
 }
-
-//dead()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //################################################## FINE A N I M A T I O N S ##################################################
 //####### TIMERS #############//////
@@ -730,9 +712,6 @@ var callSpawn = setInterval(function(){
   createObject(velocity);
   },1000);
    
-  
-
-
 //################################################### R E N D E R I N G #//###################################################
   function resizeRendererToDisplaySize(renderer) {
     const canvas = renderer.domElement;
@@ -745,24 +724,18 @@ var callSpawn = setInterval(function(){
     return needResize;
   }
 
-
-
   function render(time) {
     time *= 0.001;
-
-
-   
+    checkCollisions();
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
     }
- //##############################################
-   
-
-
-  //##############################################
+//##############################################
     renderer.render(scene, camera);
+
+
     requestAnimationFrame(render);
   }
 
