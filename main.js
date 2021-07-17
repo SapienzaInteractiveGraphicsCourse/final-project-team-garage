@@ -12,7 +12,7 @@ function main() {
   const fov = 75;
   const aspect = 2;  // the canvas default
   const near = 1;
-  const far = 20000;
+  const far = 10000;
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
   camera.position.set(0, 200, -400);
 
@@ -37,22 +37,19 @@ function main() {
   {
     const light = new THREE.AmbientLight(0x404040); // soft white light
     scene.add( light );
-    const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
-    directionalLight.position.set(0,1000,0);
+    const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.35 );
+    directionalLight.position.set(-500,1000,0);
     scene.add( directionalLight );
+    const directionalLight2 = new THREE.DirectionalLight( 0xffffff, 0.35);
+    directionalLight2.position.set(+500,1000,0);
+    scene.add( directionalLight2 );
+    const directionalLight3 = new THREE.DirectionalLight( 0xffffff, 0.35);
+    directionalLight3.position.set(0,1000,-1000);
+    scene.add( directionalLight3 );
+    
   }
 
 //###################################################### F I E L D ##################################################
-
-const groundwidth2 = 10000;  
-const groundheight2 = 10000;  
-const grounddepth2 = 1;
-const ground2 = new THREE.BoxGeometry(groundwidth2,groundheight2,grounddepth2);
-const groundMaterial2 = new THREE.MeshPhongMaterial({color: 0xCC8866});
-const groundMesh2 = new THREE.Mesh(ground2,groundMaterial2);
-groundMesh2.position.set(0,-20,groundheight2*2/4.5);
-groundMesh2.rotation.x = radians(-90);
-scene.add(groundMesh2);
 
 
 
@@ -60,20 +57,26 @@ const groundwidth = 10000;
 const groundheight = 10000;  
 const grounddepth = 1;
 const ground = new THREE.BoxGeometry(groundwidth,groundheight,grounddepth);
-const groundMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
+const groundtexture = new THREE.TextureLoader().load( './textures/grass.png' );
+
+groundtexture.wrapS = THREE.RepeatWrapping;
+groundtexture.wrapT = THREE.RepeatWrapping;
+groundtexture.repeat.set( 100, 100);
+groundtexture.anisotropy=24;
+
+const groundMaterial = new THREE.MeshPhongMaterial({map: groundtexture});
 const groundMesh = new THREE.Mesh(ground,groundMaterial);
 groundMesh.position.set(0,0,groundheight*2/4.5);
 groundMesh.rotation.x = radians(-90);
 scene.add(groundMesh);
 
 
-//###################################################### T R A C K ##################################################
-/*
-const texture = new THREE.TextureLoader().load( 'textures/land_ocean_ice_cloud_2048.jpg' );
+createjs.Tween.get(groundtexture.offset,{loop:-1}).to({y:groundtexture.offset.y-20}, 50).to({y:groundtexture.offset.y+20}, 50);
 
-// immediately use the texture for material creation
-const material = new THREE.MeshBasicMaterial( { map: texture } );
-*/
+
+
+
+//###################################################### T R A C K ##################################################
 const trackwidth=  100;  
 const trackheight = 10000; 
 const trackdepth =  1.0; 
@@ -128,34 +131,19 @@ scene.add(trackMesh);
 scene.add(trackMesh3)
 
 
-
   
- 
-
-  
-
-//###################################################### M O D E L S  ##################################################
-
-/*
-const loader = new FBXLoader();
-
-loader.load( './models/Tree1', function ( Object3D ) {
-
-scene.add( Object3D );
-
-}, undefined, function ( error ) {
-
-	console.error( error );
-
-} );
-*/
-
-
-      
+ //#FFFF00
 //#################################################### O B S T A C L E ########################################################
 
 var obstacles = []
 var highobstacles = []
+
+const railtexture = new THREE.TextureLoader().load( './textures/rails.png' );
+railtexture.wrapS = THREE.RepeatWrapping;
+railtexture.wrapT = THREE.RepeatWrapping;
+railtexture.repeat.set( 2, 1);
+railtexture.anisotropy=24;
+
 
 function createObject(interval,pos){
   var obstacle = new THREE.Object3D();
@@ -190,9 +178,9 @@ function createObject(interval,pos){
   const raildepth = 2;  
 
   const rail= new THREE.BoxGeometry(railwidth, railheight, raildepth);
-  const railMaterial = new THREE.MeshPhongMaterial({color: 0xFFFFFF});
+  const railMaterial = new THREE.MeshPhongMaterial({map: railtexture});
   const railMesh = new THREE.Mesh(rail, railMaterial);
-  const railMesh2 = new THREE.Mesh(rail, railMaterial);
+
   railMesh.position.set(0,railwidth/2-10,0);
   obstacle.add(railMesh);
 
@@ -281,7 +269,7 @@ function createObject1(interval,pos){
   const raildepth = 2;  
 
   const rail= new THREE.BoxGeometry(railwidth, railheight, raildepth);
-  const railMaterial = new THREE.MeshPhongMaterial({color: 0xFFFFFF});
+  const railMaterial = new THREE.MeshPhongMaterial({map: railtexture});
   const railMesh = new THREE.Mesh(rail, railMaterial);
   const railMesh2 = new THREE.Mesh(rail, railMaterial);
   railMesh.position.set(0,postheight-railheight,0);
@@ -294,8 +282,8 @@ function createObject1(interval,pos){
   const postMaterial = new THREE.MeshPhongMaterial({color: 0xFFFFFF});
   const postMesh = new THREE.Mesh(post, postMaterial);
   const postMesh2 = new THREE.Mesh(post, postMaterial);
-  postMesh.position.set(-railwidth/2+10,-postheight/2+railheight/2,-postdepth);
-  postMesh2.position.set(railwidth/2-10,-postheight/2+railheight/2,-postdepth);
+  postMesh.position.set(-railwidth/2+10,-postheight/2+railheight/2-railheight,-postdepth);
+  postMesh2.position.set(railwidth/2-10,-postheight/2+railheight/2-railheight,-postdepth);
   railMesh.add(postMesh);
   railMesh.add(postMesh2);
 
@@ -304,7 +292,7 @@ function createObject1(interval,pos){
   const braildepth = 10;  
 
   const brail= new THREE.BoxGeometry(brailwidth, brailheight, braildepth);
-  const brailMaterial = new THREE.MeshPhongMaterial({color: 0xFFFFFF});
+  const brailMaterial = new THREE.MeshPhongMaterial({map: railtexture});
   const brailMesh = new THREE.Mesh(brail, brailMaterial);
   const brailMesh2 = new THREE.Mesh(brail, brailMaterial);
   brailMesh.position.set(0,postheight/1.5,-braildepth/2);
@@ -322,14 +310,45 @@ function stopObstacles(){
   createjs.Tween.get(highobstacles[i].position, {override:true}).to(highobstacles[i].position.z,interval);
 }
 }
+//#################################################### OBJECT CREATE ########################################################
 
-//#################################################### TREE CREATE ########################################################
-var trees = [];
+var banners = [];
 
 
-function createTree(name){
 
-}
+const bannerwidth = 20000;  
+const bannerheight = 70;  
+const bannerdepth = 10;
+const banner = new THREE.BoxGeometry(bannerwidth, bannerheight, bannerdepth);
+
+
+const sapientiatexture = new THREE.TextureLoader().load( './textures/sapientia.jpeg' );
+sapientiatexture.wrapS = THREE.RepeatWrapping;
+sapientiatexture.wrapT = THREE.RepeatWrapping;
+sapientiatexture.repeat.set( 100, 1);
+sapientiatexture.anisotropy=24;
+
+
+const bannerMaterials =[ 
+  new THREE.MeshPhongMaterial({color: 0xFFFFFF}),
+  new THREE.MeshPhongMaterial({color: 0xFFFFFF}),
+  new THREE.MeshPhongMaterial({color: 0xFFFFFF}),
+  new THREE.MeshPhongMaterial({color: 0xFFFFFF}),
+  new THREE.MeshPhongMaterial({map: sapientiatexture}),
+  new THREE.MeshPhongMaterial({color: 0xFFFFFF})
+];
+const bannerMesh = new THREE.Mesh(banner,bannerMaterials);
+const bannerMesh2 = new THREE.Mesh(banner,bannerMaterials);
+
+bannerMesh.position.set(-500,bannerheight/2,3500);
+bannerMesh2.position.set(500,bannerheight/2,3500);
+bannerMesh.rotation.y = radians(90);
+bannerMesh2.rotation.y = radians(-90);
+scene.add(bannerMesh);
+scene.add(bannerMesh2);
+//createjs.Tween.get(sapientiatexture.offset,{loop:-1}).to({x:sapientiatexture.offset.x-10000},10000);
+createjs.Tween.get(bannerMesh.position,{loop:-1}).to({z:bannerMesh.position.z-5000},5000);
+createjs.Tween.get(bannerMesh2.position,{loop:-1}).to({z:bannerMesh2.position.z-5000},5000);
 
 
 
@@ -383,12 +402,13 @@ scene.add(human);
 const radius =  12;  
 const waist = new THREE.DodecahedronGeometry(radius);
 const waistMaterial = new THREE.MeshPhongMaterial({color: 0x6495ED});
+waistMaterial.shininess=10;
 const waistMesh = new THREE.Mesh(waist, waistMaterial);
 human.add(waistMesh);
 
 
 //-----------------------------
-//------------PHIPS------------
+//-------------HIPS------------
 //-----------------------------
 const hipsRadius =  6; 
 const widthSegments = 30;  
@@ -502,7 +522,7 @@ kneeMesh2.add(TibiaMesh2);
 
 
 //-----------------------------
-//-----------PANKLE------------
+//------------ANKLE------------
 //-----------------------------
 const ankleRadius =  2; 
 const wankleSegments = 30;  
@@ -542,8 +562,10 @@ const foot2 = new THREE.BoxGeometry(widthFoot2, heightFoot2, depthFoot2)
 const footMaterial2 = new THREE.MeshPhongMaterial({color: 0xDFFF00});
 const footMeshFront = new THREE.Mesh(foot2, footMaterial2);
 const footMeshFront2 = new THREE.Mesh(foot2, footMaterial2);
+
 footMeshFront.position.set(0,-heightFoot2/2,widthFoot1);
 footMeshFront2.position.set(0,-heightFoot2/2,widthFoot1);
+
 footMesh.add(footMeshFront);
 footMesh2.add(footMeshFront2);
 
@@ -564,6 +586,7 @@ const bottomtorsoheight = 40;
 const bottomtorsoradialSegments =  4;  
 const bottomtorso = new THREE.CylinderGeometry(bottomtorsoradiusTop, bottomtorsoradiusBottom, bottomtorsoheight, bottomtorsoradialSegments);
 const bottomtorsoMaterial = new THREE.MeshPhongMaterial({color: 0x6495ED});
+bottomtorsoMaterial.shininess=0;
 const bottomtorsoMesh = new THREE.Mesh(bottomtorso, bottomtorsoMaterial);
 bottomtorsoMesh.position.set(0,radius+8,0);
 bottomtorsoMesh.rotation.y=radians(45);
@@ -579,6 +602,7 @@ const toptorsoheight = 10;
 const toptorsoradialSegments =  4;  
 const toptorso = new THREE.CylinderGeometry(toptorsoradiusTop, toptorsoradiusBottom, toptorsoheight, toptorsoradialSegments);
 const toptorsoMaterial = new THREE.MeshPhongMaterial({color: 0x6495ED});
+toptorsoMaterial.shininess=0;
 const toptorsoMesh = new THREE.Mesh(toptorso, toptorsoMaterial);
 toptorsoMesh.position.set(0,bottomtorsoheight+toptorsoheight/2,0);
 toptorsoMesh.rotation.y=radians(45);
@@ -679,7 +703,6 @@ polsoMesh.position.set(0,-lowerArmheight/2-polsoRadius/2,0);
 polsoMesh2.position.set(0,-lowerArmheight/2-polsoRadius/2,0);
 lowerArmMesh.add(polsoMesh);
 lowerArmMesh2.add(polsoMesh2);
-
 //-----------------------------
 //------------HAND-------------
 //-----------------------------
@@ -726,9 +749,10 @@ const headMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
 const headMesh = new THREE.Mesh(head, headMaterial);
 const headMesh2 = new THREE.Mesh(head, headMaterial);
 headMesh.position.set(0,neckheight/2+headRadius/2,0);
+
 neckMesh.add(headMesh);
 
-human.position.set(0,radius+height+heightTibia+heightFoot1+2.5+grounddepth+trackdepth,0);
+human.position.set(0,radius+height+heightTibia+heightFoot1+2.5+grounddepth+trackdepth+10,0);
 
 
 
@@ -760,31 +784,300 @@ document.addEventListener('keydown', function(event) {
 
   if(event.keyCode == 65) {
     if (pos > -1 && moving == false){
-
+      var ran = Math.floor(Math.random() * (4));
       moving = true;
       pos-=1;
-      left();
+      if (ran==1){
+        left1();
+      }
+      else{
+        left()
+      }
+
     }
   }
   if(event.keyCode == 68 && moving == false ) {
       if (pos < 1 && moving == false){
-       
+        var ran = Math.floor(Math.random() * (4));
         moving = true;
         pos+=1;
-        right();
+        if (ran==1){
+          right1();
+        }
+        else{
+          right()
+        }
 
       }
   
   }
   if(event.keyCode == 83) {
+    var ran = Math.floor(Math.random() * (2));
     if (slipping == false && jumping==false){
       slipping = true;
-      slip();
+      if (ran==1){
+        slip1();
+      }
+      else{
+        slip()
+      }
 
     }
 
 }
 });
+
+
+
+//###################################################### SPECTATORS ###############################################
+var labelwidth=  100;  
+var labelheight = 50; 
+var labeldepth =  1.0; 
+
+var label= new THREE.BoxGeometry(labelwidth, labelheight, labeldepth);
+var labeltexture = new THREE.TextureLoader().load( './textures/sign.png' );
+labeltexture.anisotropy=24;
+
+var labelMaterial = new THREE.MeshPhongMaterial({map: labeltexture})
+
+var spectators = [];
+function createSpectator(x,z,maglietta_color,mutande_color,scarpe_color, type,pos){
+  var maglietta = new THREE.MeshPhongMaterial({color: maglietta_color});
+  var mutande =  new THREE.MeshPhongMaterial({color: mutande_color});
+  var scarpe = new THREE.MeshPhongMaterial({color: scarpe_color});
+  var spectator = new THREE.Object3D();
+  spectators.push(spectator);
+  scene.add(spectator);
+
+  var swaistMesh = new THREE.Mesh(waist, mutande);
+  spectator.add(swaistMesh);
+  var shipsMesh = new THREE.Mesh(hips, mutande);
+  swaistMesh.add(shipsMesh);
+  var shipsMesh2 = new THREE.Mesh(hips, mutande);
+  swaistMesh.add(shipsMesh2);
+
+  shipsMesh.position.set(radius-2,-radius/2,0);
+  shipsMesh2.position.set(-radius+2,-radius/2,0);
+
+  var slegMesh = new THREE.Mesh(leg, mutande);
+  var slegMesh2 = new THREE.Mesh(leg, mutande);
+  shipsMesh.add(slegMesh);
+  shipsMesh2.add(slegMesh2);
+  slegMesh.position.set(0,-hipsRadius-height/2,0)
+  slegMesh2.position.set(0,-hipsRadius-height/2,0)
+
+  var skneeMesh = new THREE.Mesh(knee, mutande);
+  var skneeMesh2 = new THREE.Mesh(knee, mutande);
+  slegMesh.add(skneeMesh);
+  slegMesh2.add(skneeMesh2);
+  skneeMesh.position.set(0,-height/2-kneeRadius/2,0);
+  skneeMesh2.position.set(0,-height/2-kneeRadius/2,0); 
+
+  var scalfMesh = new THREE.Mesh(calf, mutande);
+  var scalfMesh2 = new THREE.Mesh(calf, mutande);
+  skneeMesh.add(scalfMesh);
+  skneeMesh2.add(scalfMesh2);
+  scalfMesh.rotation.x = radians(90);
+  scalfMesh.rotation.z = radians(90);
+  scalfMesh2.rotation.x = radians(90);
+  scalfMesh2.rotation.z = radians(90);
+  scalfMesh.position.set(0,-kneeRadius-10,0)
+  scalfMesh2.position.set(0,-kneeRadius-10,0)
+
+
+  var sTibiaMesh = new THREE.Mesh(Tibia, mutande);
+  var sTibiaMesh2 = new THREE.Mesh(Tibia, mutande);
+  skneeMesh.add(sTibiaMesh);
+  skneeMesh2.add(sTibiaMesh2);
+  sTibiaMesh.position.set(0,-heightTibia/2-kneeRadius/2,0)
+  sTibiaMesh2.position.set(0,-heightTibia/2-kneeRadius/2,0)
+
+  var sankleMesh = new THREE.Mesh(ankle, ankleMaterial);
+  var sankleMesh2 = new THREE.Mesh(ankle, ankleMaterial);
+  sTibiaMesh.add(sankleMesh);
+  sTibiaMesh2.add(sankleMesh2);
+  sankleMesh.position.set(0,-heightTibia/2-ankleRadius/2,0);
+  sankleMesh2.position.set(0,-heightTibia/2-ankleRadius/2,0);
+
+
+
+  var sfootMeshFront = new THREE.Mesh(foot2, scarpe);
+  var sfootMeshFront2 = new THREE.Mesh(foot2, scarpe);
+  var sfootMesh = new THREE.Mesh(foot1, scarpe);
+  var sfootMesh2 = new THREE.Mesh(foot1, scarpe);
+  sfootMesh.add(sfootMeshFront)
+  sfootMesh2.add(sfootMeshFront2)
+  sankleMesh.add(sfootMesh);
+  sankleMesh2.add(sfootMesh2);
+  sfootMesh.position.set(0,-heightFoot1/2-ankleRadius/2,0);
+  sfootMesh2.position.set(0,-heightFoot1/2-ankleRadius/2,0);
+  sfootMeshFront.position.set(0,-heightFoot2/2,widthFoot1);
+  sfootMeshFront2.position.set(0,-heightFoot2/2,widthFoot1);
+
+  
+  var storso = new THREE.Object3D();
+  swaistMesh.add(storso);
+
+  var sbottomtorsoMesh = new THREE.Mesh(bottomtorso, maglietta);
+  storso.add(sbottomtorsoMesh);
+  sbottomtorsoMesh.position.set(0,radius+8,0);
+  sbottomtorsoMesh.rotation.y=radians(45);
+
+  var stoptorsoMesh = new THREE.Mesh(toptorso, maglietta);
+  storso.add(stoptorsoMesh);
+  stoptorsoMesh.position.set(0,bottomtorsoheight+toptorsoheight/2,0);
+  stoptorsoMesh.rotation.y=radians(45);
+
+  var sshoulderMesh = new THREE.Mesh(shoulder, maglietta);
+  sshoulderMesh.position.set(toptorsoradiusTop+shoulderRadius/2,bottomtorsoheight+toptorsoheight-10,0);
+  storso.add(sshoulderMesh);
+
+  var sshoulderMesh2 = new THREE.Mesh(shoulder, maglietta);
+  sshoulderMesh2.position.set(-toptorsoradiusTop-shoulderRadius/2,bottomtorsoheight+toptorsoheight-10,0);
+  storso.add(sshoulderMesh2);
+
+  var supperArmMesh = new THREE.Mesh(upperArm, maglietta);
+  supperArmMesh.position.set(4,-shoulderRadius/2-upperArmheight/2,0);
+  sshoulderMesh.add(supperArmMesh);
+  
+  var supperArmMesh2 = new THREE.Mesh(upperArm, maglietta);
+  supperArmMesh2.position.set(-4,-shoulderRadius/2-upperArmheight/2,0);
+  sshoulderMesh2.add(supperArmMesh2);
+ 
+  var selbowMesh = new THREE.Mesh(elbow, elbowMaterial);
+  selbowMesh.position.set(0,-upperArmheight/2-elbowRadius/2,0);
+  supperArmMesh.add(selbowMesh);
+
+
+  var selbowMesh2 = new THREE.Mesh(elbow, elbowMaterial);
+  selbowMesh2.position.set(0,-upperArmheight/2-elbowRadius/2,0);
+  supperArmMesh2.add(selbowMesh2);
+  
+  var slowerArmMesh = new THREE.Mesh(lowerArm, lowerArmMaterial);
+  slowerArmMesh.position.set(0,-lowerArmheight/2-elbowRadius/2,0);
+  selbowMesh.add(slowerArmMesh)
+
+  var slowerArmMesh2 = new THREE.Mesh(lowerArm, lowerArmMaterial);
+  slowerArmMesh2.position.set(0,-lowerArmheight/2-elbowRadius/2,0);
+  selbowMesh2.add(slowerArmMesh2)
+  
+  var spolsoMesh = new THREE.Mesh(polso, polsoMaterial);
+  spolsoMesh.position.set(0,-lowerArmheight/2-polsoRadius/2,0);
+  slowerArmMesh.add(spolsoMesh)
+  
+  var spolsoMesh2 = new THREE.Mesh(polso, polsoMaterial);
+  spolsoMesh2.position.set(0,-lowerArmheight/2-polsoRadius/2,0);
+  slowerArmMesh2.add(spolsoMesh2)
+
+
+  var shandMeshFront = new THREE.Mesh(hand, handMaterial);
+  shandMeshFront.position.set(0,-heightHand/2-polsoRadius/2,0);
+  spolsoMesh.add(shandMeshFront)
+
+  var shandMeshFront2 = new THREE.Mesh(hand, handMaterial);
+  shandMeshFront2.position.set(0,-heightHand/2-polsoRadius/2,0);
+  spolsoMesh2.add(shandMeshFront2)
+
+
+  var sneckMesh= new THREE.Mesh(neck, neckMaterial);
+  sneckMesh.position.set(0,neckheight/2+toptorsoheight/2,0)
+  stoptorsoMesh.add(sneckMesh);
+
+  var sheadMesh = new THREE.Mesh(head, headMaterial);
+  sheadMesh.position.set(0,neckheight/2+headRadius/2,0);
+  sneckMesh.add(sheadMesh);
+  spectator.position.set(-100,radius+height+heightTibia+heightFoot1+2.5+grounddepth+trackdepth+10,0);
+  spectator.position.x = x;
+  spectator.position.z = z;
+  
+  var interval = 300;
+  if (type == 0){
+
+    createjs.Tween.get(selbowMesh.rotation ).to({x:radians(-100)}, 0);
+    createjs.Tween.get(selbowMesh2.rotation ).to({x:radians(-100)},0);
+    createjs.Tween.get(sshoulderMesh.rotation ).to({x:radians(-45)}, 0);
+    createjs.Tween.get(sshoulderMesh2.rotation ).to({x:radians(-45)},0);
+    createjs.Tween.get(selbowMesh.rotation, {loop:-1} ).to({z:radians(-45)}, interval/2).to({z:radians(0)}, interval/2);
+    createjs.Tween.get(selbowMesh2.rotation , {loop:-1}).to({z:radians(45)},interval/2).to({z:radians(0)}, interval/2);
+  }
+  if (type==1){
+    var interval = 600;
+    createjs.Tween.get(swaistMesh.position, {loop:-1}).to({y:30}, interval/2).to({y:0},interval/2);
+
+
+    createjs.Tween.get(sshoulderMesh.rotation).to({x:radians(-150)},0)
+    createjs.Tween.get(sshoulderMesh2.rotation).to({x:radians(-150)},0)
+    //createjs.Tween.get(sshoulderMesh.rotation, {loop:-1} ).to({x:radians(-180)}, interval/2).to({x:radians(-180)}, interval/2);
+    //createjs.Tween.get(sshoulderMesh2.rotation, {loop:-1} ).to({x:radians(-180)},interval/2).to({x:radians(-180)}, interval/2);;
+    createjs.Tween.get(selbowMesh.rotation,{loop:-1} ).to({z:radians(-25)}, 0);
+    createjs.Tween.get(selbowMesh2.rotation,{loop:-1} ).to({z:radians(25)},0);
+    createjs.Tween.get(sshoulderMesh.rotation,{loop:-1} ).to({z:radians(75)}, interval/2).to({z:radians(0)}, interval/2);
+    createjs.Tween.get(sshoulderMesh2.rotation,{loop:-1} ).to({z:radians(-75)},interval/2).to({z:radians(0)}, interval/2);
+
+
+    createjs.Tween.get(sankleMesh.rotation ).to({x:radians(-180)}, interval/2).to({x:0},interval/2);
+    createjs.Tween.get(sankleMesh2.rotation ).to({x:radians(-180)},interval/2).to({x:0},interval/2);
+    createjs.Tween.get(skneeMesh.rotation, {loop:-1}).to({x:radians(45)}, interval/2).to({x:radians(0)}, interval/2);
+    createjs.Tween.get(skneeMesh2.rotation, {loop:-1}).to({x:radians(45)}, interval/2).to({x:radians(0)}, interval/2);
+    createjs.Tween.get(shipsMesh.rotation, {loop:-1}).to({x:radians(-25)}, interval/2).to({x:radians(0)}, interval/2)
+    createjs.Tween.get(shipsMesh2.rotation, {loop:-1}).to({x:radians(-25)}, interval/2).to({x:radians(0)},interval/2)
+  }
+  if (type == 2){
+    
+    var labelMesh = new THREE.Mesh(label, labelMaterial);
+    labelMesh.rotation.z = radians(180)
+    labelMesh.position.x = -25
+    labelMesh.position.y = -25
+    shandMeshFront.add(labelMesh);
+    createjs.Tween.get(selbowMesh.rotation ).to({x:radians(-100)}, 0);
+    createjs.Tween.get(selbowMesh2.rotation ).to({x:radians(-100)},0);
+    createjs.Tween.get(sshoulderMesh.rotation ).to({x:radians(-120)}, 0);
+    createjs.Tween.get(sshoulderMesh2.rotation ).to({x:radians(-120)},0);
+
+    
+  }
+  if (type==3){
+    var interval = 600;
+    var labelMesh = new THREE.Mesh(label, labelMaterial);
+    labelMesh.rotation.x = radians(-75);
+    shandMeshFront.add(labelMesh);
+    createjs.Tween.get(swaistMesh.position, {loop:-1}).to({y:30}, interval/2).to({y:0},interval/2);
+    createjs.Tween.get(sshoulderMesh.rotation).to({x:radians(-150)},0)
+    createjs.Tween.get(sshoulderMesh2.rotation).to({x:radians(-150)},0)
+    //createjs.Tween.get(sshoulderMesh.rotation, {loop:-1} ).to({x:radians(-180)}, interval/2).to({x:radians(-180)}, interval/2);
+    //createjs.Tween.get(sshoulderMesh2.rotation, {loop:-1} ).to({x:radians(-180)},interval/2).to({x:radians(-180)}, interval/2);;
+    createjs.Tween.get(selbowMesh.rotation,{loop:-1} ).to({z:radians(-25)}, 0);
+    createjs.Tween.get(selbowMesh2.rotation,{loop:-1} ).to({z:radians(25)},0);
+    createjs.Tween.get(sshoulderMesh.rotation,{loop:-1} ).to({z:radians(75)}, interval/2).to({z:radians(0)}, interval/2);
+    createjs.Tween.get(sshoulderMesh2.rotation,{loop:-1} ).to({z:radians(-75)},interval/2).to({z:radians(0)}, interval/2);
+
+
+    createjs.Tween.get(sankleMesh.rotation ).to({x:radians(-180)}, interval/2).to({x:0},interval/2);
+    createjs.Tween.get(sankleMesh2.rotation ).to({x:radians(-180)},interval/2).to({x:0},interval/2);
+    createjs.Tween.get(skneeMesh.rotation, {loop:-1}).to({x:radians(45)}, interval/2).to({x:radians(0)}, interval/2);
+    createjs.Tween.get(skneeMesh2.rotation, {loop:-1}).to({x:radians(45)}, interval/2).to({x:radians(0)}, interval/2);
+    createjs.Tween.get(shipsMesh.rotation, {loop:-1}).to({x:radians(-25)}, interval/2).to({x:radians(0)}, interval/2)
+    createjs.Tween.get(shipsMesh2.rotation, {loop:-1}).to({x:radians(-25)}, interval/2).to({x:radians(0)},interval/2)
+  }
+  if (pos==0){
+    swaistMesh.rotation.y = radians(-135);
+    spectator.position.x = 600;
+  }
+  else{
+    swaistMesh.rotation.y = radians(-225);
+    spectator.position.x = -600;
+  }
+  createjs.Tween.get(spectator.position).to({z:-500},5000).call(function(){scene.remove(spectator)});
+
+}
+
+
+
+
+
+
+
+
 //###################################################### A N I M A T I O N S ##################################################
 
 
@@ -863,7 +1156,6 @@ function jump2(){
 function slip(){
     var interval = 600
     createjs.Tween.get(camera.position).to({y:camera.position.y - 100}, interval/2).to({y:camera.position.y}, interval/2);
-
     createjs.Tween.get(waistMesh.position).to({y:-60}, interval/2).to({y:0},interval/4);
     createjs.Tween.get(waistMesh.rotation).to({x:radians(-90)}, interval/2).to({x:radians(0)},interval/2);
     createjs.Tween.get(torso.rotation).to({x:radians(30)}, interval/2).to({x:radians(0)},interval/2);
@@ -876,6 +1168,25 @@ function slip(){
 }
 
 
+function slip1(){
+  var interval = 600
+  createjs.Tween.get(camera.position).to({y:camera.position.y - 100}, interval/2).to({y:camera.position.y}, interval/2);
+
+  createjs.Tween.get(waistMesh.rotation).to({x:radians(360)}, interval).to({x:radians(0)}, 0);
+
+  createjs.Tween.get(waistMesh.position).to({y:-10}, interval/2).to({y:0},interval/4);
+  //createjs.Tween.get(waistMesh.rotation).to({x:radians(-90)}, interval/2).to({x:radians(0)},interval/2);
+  createjs.Tween.get(torso.rotation).to({x:radians(30)}, interval/2).to({x:radians(0)},interval/2);
+  createjs.Tween.get(hipsMesh.rotation).to({x:radians(-80)}, interval/2).to({x:radians(0)},interval/2);
+  createjs.Tween.get(hipsMesh2.rotation).to({x:radians(-80)}, interval/2).to({x:radians(0)},interval/2);
+  createjs.Tween.get(kneeMesh.rotation).to({x:radians(90)}, interval/2).to({x:radians(0)}, interval/2)
+  createjs.Tween.get(kneeMesh2.rotation).to({x:radians(90)}, interval/2).to({x:radians(0)}, interval/2).call(function(){slipping=false;})
+  
+
+}
+
+
+
 //-----------------------------
 //------------LEFT-------------
 //-----------------------------
@@ -883,16 +1194,47 @@ function slip(){
 function left(){
   var interval = 200;
   createjs.Tween.get(waistMesh.position).to({x:waistMesh.position.x + 100}, interval).call(function(){moving=false;});
-
   createjs.Tween.get(camera.position).to({x:camera.position.x + 100}, interval);
-
   createjs.Tween.get(waistMesh.rotation).to({y:radians(45)}, interval/2).to({y:radians(0)},interval/2);
   createjs.Tween.get(torso.rotation).to({z:radians(45)}, interval/2).to({z:radians(0)},interval/2);
+  
+  createjs.Tween.get(waistMesh.position).to({x:waistMesh.position.x + 100}, interval).call(function(){moving=false;});
+  createjs.Tween.get(camera.position).to({x:camera.position.x + 100}, interval);
 }
+
+function left1(){
+  var interval = 200;
+  createjs.Tween.get(waistMesh.position).to({x:waistMesh.position.x + 100}, interval).call(function(){moving=false;});
+  createjs.Tween.get(camera.position).to({x:camera.position.x + 100}, interval);
+  createjs.Tween.get(waistMesh.rotation).to({y:radians(45)}, interval/2).to({y:radians(0)},interval/2);
+  createjs.Tween.get(torso.rotation).to({z:radians(45)}, interval/2).to({z:radians(0)},interval/2);
+  
+  createjs.Tween.get(waistMesh.position).to({x:waistMesh.position.x + 100}, interval).call(function(){moving=false;});
+  createjs.Tween.get(camera.position).to({x:camera.position.x + 100}, interval);
+
+  createjs.Tween.get(shoulderMesh.rotation).to({z:radians(75)}, interval).to({z:radians(0)},interval);
+  createjs.Tween.get(shoulderMesh2.rotation).to({z:radians(-75)}, interval).to({z:radians(0)},interval);
+}
+
+
 
 //-----------------------------
 //------------RIGHT-------------
 //-----------------------------
+
+function right1(){
+  var interval = 200;
+  createjs.Tween.get(waistMesh.position).to({x:waistMesh.position.x - 100}, interval).call(function(){moving=false;});
+
+  createjs.Tween.get(camera.position).to({x:camera.position.x - 100}, interval)
+
+  createjs.Tween.get(waistMesh.rotation).to({y:radians(-45)}, interval/2).to({y:radians(0)},interval/2);
+  createjs.Tween.get(torso.rotation).to({z:radians(-45)}, interval/2).to({z:radians(0)},interval/2);
+
+  createjs.Tween.get(shoulderMesh.rotation).to({z:radians(75)}, interval).to({z:radians(0)},interval);
+  createjs.Tween.get(shoulderMesh2.rotation).to({z:radians(-75)}, interval).to({z:radians(0)},interval);
+}
+
 
 function right(){
   var interval = 200;
@@ -903,7 +1245,6 @@ function right(){
   createjs.Tween.get(waistMesh.rotation).to({y:radians(-45)}, interval/2).to({y:radians(0)},interval/2);
   createjs.Tween.get(torso.rotation).to({z:radians(-45)}, interval/2).to({z:radians(0)},interval/2);
 }
-
 //-----------------------------
 //------------DEAD-------------
 //-----------------------------
@@ -948,7 +1289,7 @@ function dead(){
 //################################################## FINE A N I M A T I O N S ##################################################
 //####### TIMERS #############//////
 
-var velocity = 3500;
+var velocity = 4000;
 //1 left, 2 center, 3 right
 var callSpawn = setInterval(function(){
   var val =  Math.floor(Math.random() * (10));
@@ -1010,17 +1351,45 @@ var callSpawn = setInterval(function(){
  
 
 
-  },1500);
-
-
-  var treeSpawn = setInterval(function(){
-    
   },1000);
 
+  var colors = [
+    0x82E0AA,
+    0xEBEE63,
+    0xAF7AC5,
+    0xEEBB63,
+    0x85C1E9,
+    0x63D1EE,
+    0xFDFEFE,
+    0x93EE63,
+    0xD35CB3,
+    0xFFFF00,
+    0xFFE1F7,
+    0xE2E1FF,
+    0x7CFC00,
+    0x00FFFF
+  ]
+
+
+  var spectatorSpawn = setInterval(function(){
+    var maglietta = colors[Math.floor(Math.random()*(14))];
+    var mutande = colors[Math.floor(Math.random()*(14))];
+    var scarpe = colors[Math.floor(Math.random()*(14))];
+    var pos = Math.floor(Math.random()*(2));
+    var type = Math.floor(Math.random()*(4));
+    createSpectator(100,10000,maglietta,mutande,scarpe,type,pos);
+  },200);
+
+
   function stopspawn() {
-    clearInterval(callSpawn);
+    clearInterval(spectatorSpawn);
 }
-   
+
+
+
+
+
+
 //################################################### R E N D E R I N G #//###################################################
   function resizeRendererToDisplaySize(renderer) {
     const canvas = renderer.domElement;
@@ -1035,7 +1404,7 @@ var callSpawn = setInterval(function(){
 
   function render(time) {
     time *= 0.001;
-    checkCollisions();
+    //checkCollisions();
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
