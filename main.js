@@ -88,7 +88,7 @@ stadiumTexture.anisotropy=24;
 const stadium = new THREE.BoxGeometry(stadiumwidth,stadiumheight,stadiumdepth);
 const stadiumMaterial = new THREE.MeshPhongMaterial({map: stadiumTexture});
 const stadiumMesh = new THREE.Mesh(stadium,stadiumMaterial);
-stadiumMesh.position.set(2500,stadiumheight/3,stadiumdepth/2-600);
+stadiumMesh.position.set(3000,stadiumheight/3,stadiumdepth/2-600);
 stadiumMesh.rotation.z = radians(-45);
 scene.add(stadiumMesh);
 
@@ -104,7 +104,7 @@ stadium2Texture.anisotropy=24;
 const stadium2 = new THREE.BoxGeometry(stadium2width,stadium2height,stadium2depth);
 const stadium2Material = new THREE.MeshPhongMaterial({map: stadium2Texture});
 const stadium2Mesh = new THREE.Mesh(stadium2,stadium2Material);
-stadium2Mesh.position.set(-2500,stadium2height/3,stadium2depth/2-600);
+stadium2Mesh.position.set(-3500,stadium2height/3,stadium2depth/2-600);
 stadium2Mesh.rotation.z = radians(45);
 scene.add(stadium2Mesh);
 //10000
@@ -140,8 +140,8 @@ const fence = new THREE.BoxGeometry(fencewidth,fenceheight,fencedepth);
 const fenceMaterial = new THREE.MeshPhongMaterial({color:0xFFFFFF});
 const fenceMesh = new THREE.Mesh(fence,fenceMaterial);
 const fenceMesh2 = new THREE.Mesh(fence,fenceMaterial);
-fenceMesh.position.set(1500,0,0);
-fenceMesh2.position.set(-1500,0,0);
+fenceMesh.position.set(2000,0,0);
+fenceMesh2.position.set(-2000,0,0);
 groundMesh.add(fenceMesh);
 groundMesh.add(fenceMesh2);
 
@@ -152,8 +152,8 @@ const pavement = new THREE.BoxGeometry(pavementwidth,pavementheight,pavementdept
 const pavementMaterial = new THREE.MeshPhongMaterial({color:0xFFFFFF});
 const pavementMesh = new THREE.Mesh(pavement,pavementMaterial);
 const pavementMesh2 = new THREE.Mesh(pavement,pavementMaterial);
-pavementMesh.position.set(2500,0,0);
-pavementMesh2.position.set(-2500,0,0);
+pavementMesh.position.set(3000,0,0);
+pavementMesh2.position.set(-3000,0,0);
 groundMesh.add(pavementMesh);
 groundMesh.add(pavementMesh2);
 
