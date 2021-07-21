@@ -75,6 +75,90 @@ createjs.Tween.get(groundtexture.offset,{loop:-1}).to({y:groundtexture.offset.y-
 
 
 
+//###################################################### S T A D I U M (STADIUM) ##################################################
+
+const stadiumwidth = 10;  
+const stadiumheight = 500;  
+const stadiumdepth = 10000;
+const stadiumTexture = new THREE.TextureLoader().load( './textures/crowd.jpeg' );
+stadiumTexture.wrapS = THREE.RepeatWrapping;
+stadiumTexture.wrapT = THREE.RepeatWrapping;
+stadiumTexture.repeat.set( 10, 1);
+stadiumTexture.anisotropy=24;
+const stadium = new THREE.BoxGeometry(stadiumwidth,stadiumheight,stadiumdepth);
+const stadiumMaterial = new THREE.MeshPhongMaterial({map: stadiumTexture});
+const stadiumMesh = new THREE.Mesh(stadium,stadiumMaterial);
+stadiumMesh.position.set(2500,stadiumheight/3,stadiumdepth/2-600);
+stadiumMesh.rotation.z = radians(-45);
+scene.add(stadiumMesh);
+
+
+const stadium2width = 10;  
+const stadium2height = 500;  
+const stadium2depth = 10000;
+const stadium2Texture = new THREE.TextureLoader().load( './textures/crowd.jpeg' );
+stadium2Texture.wrapS = THREE.RepeatWrapping;
+stadium2Texture.wrapT = THREE.RepeatWrapping;
+stadium2Texture.repeat.set( 10, 1);
+stadium2Texture.anisotropy=24;
+const stadium2 = new THREE.BoxGeometry(stadium2width,stadium2height,stadium2depth);
+const stadium2Material = new THREE.MeshPhongMaterial({map: stadium2Texture});
+const stadium2Mesh = new THREE.Mesh(stadium2,stadium2Material);
+stadium2Mesh.position.set(-2500,stadium2height/3,stadium2depth/2-600);
+stadium2Mesh.rotation.z = radians(45);
+scene.add(stadium2Mesh);
+//10000
+createjs.Tween.get(stadiumTexture.offset,{loop:-1}).to({x:stadiumTexture.offset.x+1}, 10000).to({x:stadiumTexture.offset.x}, 0);
+createjs.Tween.get(stadium2Texture.offset,{loop:-1}).to({x:stadium2Texture.offset.x-1}, 10000).to({x:stadium2Texture.offset.x}, 0);
+
+
+const roofwidth = 10;  
+const roofheight = 250;  
+const roofdepth = 10000;
+const roof = new THREE.BoxGeometry(roofwidth,roofheight,roofdepth);
+const roofMaterial = new THREE.MeshPhongMaterial({color:0xFFFFFF});
+const roofMesh = new THREE.Mesh(roof,roofMaterial);
+roofMesh.position.set(0,stadiumheight/3+roofheight/2,0);
+roofMesh.rotation.z = radians(100);
+stadiumMesh.add(roofMesh);
+
+const roof2width = 10;  
+const roof2height = 250;  
+const roof2depth = 10000;
+const roof2 = new THREE.BoxGeometry(roof2width,roof2height,roof2depth);
+const roof2Material = new THREE.MeshPhongMaterial({color:0xFFFFFF});
+const roof2Mesh = new THREE.Mesh(roof2,roof2Material);
+roof2Mesh.position.set(0,stadiumheight/3+roof2height/2,0);
+roof2Mesh.rotation.z = radians(-100);
+stadium2Mesh.add(roof2Mesh);
+
+
+const fencewidth = 10;  
+const fenceheight = 10000;  
+const fencedepth = 150;
+const fence = new THREE.BoxGeometry(fencewidth,fenceheight,fencedepth);
+const fenceMaterial = new THREE.MeshPhongMaterial({color:0xFFFFFF});
+const fenceMesh = new THREE.Mesh(fence,fenceMaterial);
+const fenceMesh2 = new THREE.Mesh(fence,fenceMaterial);
+fenceMesh.position.set(1500,0,0);
+fenceMesh2.position.set(-1500,0,0);
+groundMesh.add(fenceMesh);
+groundMesh.add(fenceMesh2);
+
+const pavementwidth = 2000;  
+const pavementheight = 10000;  
+const pavementdepth = 10;
+const pavement = new THREE.BoxGeometry(pavementwidth,pavementheight,pavementdepth);
+const pavementMaterial = new THREE.MeshPhongMaterial({color:0xFFFFFF});
+const pavementMesh = new THREE.Mesh(pavement,pavementMaterial);
+const pavementMesh2 = new THREE.Mesh(pavement,pavementMaterial);
+pavementMesh.position.set(2500,0,0);
+pavementMesh2.position.set(-2500,0,0);
+groundMesh.add(pavementMesh);
+groundMesh.add(pavementMesh2);
+
+
+
 
 //###################################################### T R A C K ##################################################
 const trackwidth=  100;  
@@ -224,7 +308,7 @@ function createObject(interval,pos){
   obstacle.rotation.y = radians(180);
 
   
-  createjs.Tween.get(obstacle.position).to({z:-500}, interval).call(function(){scene.remove(obstacle);});
+  createjs.Tween.get(obstacle.position).to({z:-500}, interval).call(function(){scene.remove(obstacle),obstacles.shift()});
 }
 
 
@@ -298,7 +382,7 @@ function createObject1(interval,pos){
   brailMesh.position.set(0,postheight/1.5,-braildepth/2);
   obstacle.add(brailMesh);
 
-  createjs.Tween.get(obstacle.position).to({z:-500}, interval).call(function(){scene.remove(obstacle);});
+  createjs.Tween.get(obstacle.position).to({z:-500}, interval).call(function(){scene.remove(obstacle);highobstacles.shift()});
 }
 
 function stopObstacles(){
@@ -309,6 +393,15 @@ function stopObstacles(){
  for(var i=0; i<highobstacles.length; i++) {
   createjs.Tween.get(highobstacles[i].position, {override:true}).to(highobstacles[i].position.z,interval);
 }
+for(var i=0; i<spectators.length; i++) {
+  createjs.Tween.get(spectators[i].position, {override:true}).to(spectators[i].position.z,interval);
+}
+createjs.Tween.get(groundtexture.offset,{override:true}).to({y:groundtexture.offset.y-20}, 0)
+createjs.Tween.get(bannerMesh.position,{override:true}).to({z:bannerMesh.position.z-5000},0);
+createjs.Tween.get(bannerMesh2.position,{override:true}).to({z:bannerMesh2.position.z+5000},0);
+
+ obstacles = [];
+ highobstacles = [];
 }
 //#################################################### OBJECT CREATE ########################################################
 
@@ -347,8 +440,8 @@ bannerMesh2.rotation.y = radians(-90);
 scene.add(bannerMesh);
 scene.add(bannerMesh2);
 //createjs.Tween.get(sapientiatexture.offset,{loop:-1}).to({x:sapientiatexture.offset.x-10000},10000);
-createjs.Tween.get(bannerMesh.position,{loop:-1}).to({z:bannerMesh.position.z-5000},5000);
-createjs.Tween.get(bannerMesh2.position,{loop:-1}).to({z:bannerMesh2.position.z-5000},5000);
+createjs.Tween.get(bannerMesh.position,{loop:-1}).to({z:bannerMesh.position.z-5000},4000);
+createjs.Tween.get(bannerMesh2.position,{loop:-1}).to({z:bannerMesh2.position.z-5000},4000);
 
 
 
@@ -392,7 +485,6 @@ function checkCollisions(){
 //###################################################### H U M A N ###########################################################
 
 const human = new THREE.Object3D();
-
   
 scene.add(human);
 
@@ -1067,7 +1159,7 @@ function createSpectator(x,z,maglietta_color,mutande_color,scarpe_color, type,po
     swaistMesh.rotation.y = radians(-225);
     spectator.position.x = -600;
   }
-  createjs.Tween.get(spectator.position).to({z:-500},5000).call(function(){scene.remove(spectator)});
+  createjs.Tween.get(spectator.position).to({z:-500},8000).call(function(){scene.remove(spectator),spectators.shift()});
 
 }
 
@@ -1289,7 +1381,7 @@ function dead(){
 //################################################## FINE A N I M A T I O N S ##################################################
 //####### TIMERS #############//////
 
-var velocity = 4000;
+var velocity = 8000;
 //1 left, 2 center, 3 right
 var callSpawn = setInterval(function(){
   var val =  Math.floor(Math.random() * (10));
@@ -1351,7 +1443,7 @@ var callSpawn = setInterval(function(){
  
 
 
-  },1000);
+  },2000);
 
   var colors = [
     0x82E0AA,
@@ -1380,9 +1472,15 @@ var callSpawn = setInterval(function(){
     createSpectator(100,10000,maglietta,mutande,scarpe,type,pos);
   },200);
 
+  
+
+
+
+
 
   function stopspawn() {
     clearInterval(spectatorSpawn);
+    clearInterval(callSpawn);
 }
 
 
