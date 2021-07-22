@@ -6,7 +6,9 @@ import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/l
 function main() {
   const canvas = document.querySelector('#c');
   const renderer = new THREE.WebGLRenderer({canvas});
-  renderer.setClearColor(0x87ceeb);
+  //renderer.setClearColor(0x87ceeb); (DAY)
+  //Night
+  renderer.setClearColor(0x131862); 
   renderer.shadowMap.enabled = true;
 
   const fov = 75;
@@ -26,15 +28,17 @@ function main() {
   function radians(degrees) {
     return degrees * Math.PI / 180;
   }
-  
+
+
 
 //###################################################### S C E N E ##################################################
 
   const scene = new THREE.Scene();
   
-  
+  //LIGHTS  
 
   {
+    /*
     const light = new THREE.AmbientLight(0x404040); // soft white light
     scene.add( light );
     const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.35 );
@@ -46,8 +50,12 @@ function main() {
     const directionalLight3 = new THREE.DirectionalLight( 0xffffff, 0.35);
     directionalLight3.position.set(0,1000,-1000);
     scene.add( directionalLight3 );
+    */
+    var ambientNightLight = new THREE.AmbientLight( 0x222222);
+    scene.add(ambientNightLight);
     
   }
+
 
 //###################################################### F I E L D ##################################################
 
@@ -65,6 +73,7 @@ groundtexture.repeat.set( 100, 100);
 groundtexture.anisotropy=24;
 
 const groundMaterial = new THREE.MeshPhongMaterial({map: groundtexture});
+groundMaterial.shininess = 0;
 const groundMesh = new THREE.Mesh(ground,groundMaterial);
 groundMesh.position.set(0,0,groundheight*2/4.5);
 groundMesh.rotation.x = radians(-90);
@@ -72,7 +81,6 @@ scene.add(groundMesh);
 
 
 createjs.Tween.get(groundtexture.offset,{loop:-1}).to({y:groundtexture.offset.y-20}, 50).to({y:groundtexture.offset.y+20}, 50);
-
 
 
 //###################################################### S T A D I U M (STADIUM) ##################################################
@@ -87,8 +95,9 @@ stadiumTexture.repeat.set( 10, 1);
 stadiumTexture.anisotropy=24;
 const stadium = new THREE.BoxGeometry(stadiumwidth,stadiumheight,stadiumdepth);
 const stadiumMaterial = new THREE.MeshPhongMaterial({map: stadiumTexture});
+stadiumMaterial.shininess=0;
 const stadiumMesh = new THREE.Mesh(stadium,stadiumMaterial);
-stadiumMesh.position.set(3000,stadiumheight/3,stadiumdepth/2-600);
+stadiumMesh.position.set(4000,stadiumheight/3,stadiumdepth/2-600);
 stadiumMesh.rotation.z = radians(-45);
 scene.add(stadiumMesh);
 
@@ -103,13 +112,16 @@ stadium2Texture.repeat.set( 10, 1);
 stadium2Texture.anisotropy=24;
 const stadium2 = new THREE.BoxGeometry(stadium2width,stadium2height,stadium2depth);
 const stadium2Material = new THREE.MeshPhongMaterial({map: stadium2Texture});
+stadium2Material.shininess=0;
 const stadium2Mesh = new THREE.Mesh(stadium2,stadium2Material);
-stadium2Mesh.position.set(-3500,stadium2height/3,stadium2depth/2-600);
+stadium2Mesh.position.set(-4000,stadium2height/3,stadium2depth/2-600);
 stadium2Mesh.rotation.z = radians(45);
 scene.add(stadium2Mesh);
 //10000
-createjs.Tween.get(stadiumTexture.offset,{loop:-1}).to({x:stadiumTexture.offset.x+1}, 10000).to({x:stadiumTexture.offset.x}, 0);
-createjs.Tween.get(stadium2Texture.offset,{loop:-1}).to({x:stadium2Texture.offset.x-1}, 10000).to({x:stadium2Texture.offset.x}, 0);
+/*
+createjs.Tween.get(stadiumTexture.offset,{loop:-1}).to({x:stadiumTexture.offset.x+0.25}, 10000)
+createjs.Tween.get(stadium2Texture.offset,{loop:-1}).to({x:stadium2Texture.offset.x-0.25}, 10000)
+*/
 
 
 const roofwidth = 10;  
@@ -136,12 +148,16 @@ stadium2Mesh.add(roof2Mesh);
 const fencewidth = 10;  
 const fenceheight = 10000;  
 const fencedepth = 150;
+const fencetexture = new THREE.TextureLoader().load( './textures/fence.jpeg' );
+fencetexture.wrapS = THREE.RepeatWrapping;
+fencetexture.wrapT = THREE.RepeatWrapping;
+fencetexture.repeat.set( 1, 50);
 const fence = new THREE.BoxGeometry(fencewidth,fenceheight,fencedepth);
-const fenceMaterial = new THREE.MeshPhongMaterial({color:0xFFFFFF});
+const fenceMaterial = new THREE.MeshPhongMaterial({map: fencetexture});
 const fenceMesh = new THREE.Mesh(fence,fenceMaterial);
 const fenceMesh2 = new THREE.Mesh(fence,fenceMaterial);
-fenceMesh.position.set(2000,0,0);
-fenceMesh2.position.set(-2000,0,0);
+fenceMesh.position.set(3000,0,0);
+fenceMesh2.position.set(-3000,0,0);
 groundMesh.add(fenceMesh);
 groundMesh.add(fenceMesh2);
 
@@ -152,8 +168,8 @@ const pavement = new THREE.BoxGeometry(pavementwidth,pavementheight,pavementdept
 const pavementMaterial = new THREE.MeshPhongMaterial({color:0xFFFFFF});
 const pavementMesh = new THREE.Mesh(pavement,pavementMaterial);
 const pavementMesh2 = new THREE.Mesh(pavement,pavementMaterial);
-pavementMesh.position.set(3000,0,0);
-pavementMesh2.position.set(-3000,0,0);
+pavementMesh.position.set(4000,0,0);
+pavementMesh2.position.set(-4000,0,0);
 groundMesh.add(pavementMesh);
 groundMesh.add(pavementMesh2);
 
@@ -217,6 +233,7 @@ scene.add(trackMesh3)
 
   
  //#FFFF00
+ 
 //#################################################### O B S T A C L E ########################################################
 
 var obstacles = []
@@ -477,8 +494,122 @@ function checkCollisions(){
 }
 }
 
+//##################################################### LAMP #################################################################
+var lamps = [];
+function createlamp(side,posz){
+  var radiusTop = 40; 
+  var radiusBottom = 40;  
+  var height = 1000;  
+  var height2 = 500;
+  var radius2 = 20;
+  var radialSegments = 12;  
+  var heightSegments = 2;  
+
+  var openEnded = false;  
+  var thetaStart = Math.PI * 0.25;  
+
+  var thetaLength = Math.PI * 1.5;  
+
+  var bottomCylinder = new THREE.CylinderGeometry(
+    radiusTop, radiusBottom, height,
+    radialSegments);
+
+  var topCylinder = new THREE.CylinderGeometry(
+    radius2, radius2, height,
+    radialSegments)
+  var  material = new THREE.MeshPhongMaterial({color:0xFFFFFF});
+  var lampMesh = new THREE.Mesh(bottomCylinder,material);
+  lampMesh.position.z = posz
+  var lampMesh2  = new THREE.Mesh(topCylinder,material);
+  lampMesh.position.y = height/2;
+  lampMesh2.position.y = height2
 
 
+
+
+  scene.add(lampMesh);
+  lamps.push(lampMesh);
+  lampMesh.add(lampMesh2);
+  
+
+var width = 300;  
+var height = 300;  
+var depth = 25;  
+var geometry2 = new THREE.BoxGeometry(width, height, depth);
+
+
+
+
+var lighttexture = new THREE.TextureLoader().load( './textures/lamp.png' );
+lighttexture.anisotropy=24;
+var  material2 = new THREE.MeshStandardMaterial({emissive:0xFFFFFF,emissiveMap: lighttexture});
+
+
+var mesh = new THREE.Mesh(geometry2,material2);
+var mesh2 = new THREE.Mesh(geometry2,material);
+mesh.position.y = height2+100;
+mesh.position.z = -100;
+mesh2.position.y = height2+120;
+mesh2.position.z = -70;
+lampMesh2.add(mesh);
+lampMesh2.add(mesh2);
+mesh.rotation.x = radians(-45);
+mesh2.rotation.x = radians(-45);
+
+if (side==0){
+  lampMesh.rotation.y = radians(90);
+  lampMesh.position.x = 4800;
+}
+else{
+  lampMesh.rotation.y = radians(-90);
+  lampMesh.position.x = -4800;
+}
+
+
+
+const spotLight = new THREE.SpotLight( 0xFFFFFF,2,6500,radians(90),1);
+spotLight.position.set( 0, 500, 0);
+//const helper = new THREE.SpotLightHelper(spotLight)
+
+spotLight.castShadow = false;
+
+spotLight.shadow.mapSize.width = 512;
+spotLight.shadow.mapSize.height = 512;
+
+spotLight.shadow.camera.near = 500;
+spotLight.shadow.camera.far = 4000;
+spotLight.shadow.camera.fov = 0;
+
+mesh.add( spotLight );
+
+}
+
+
+
+
+createlamp(1,0);
+createlamp(0,0);
+createlamp(1,2000);
+createlamp(0,2000);
+createlamp(1,4000);
+createlamp(0,4000);
+createlamp(1,6000);
+createlamp(0,6000);
+createlamp(1,8000);
+createlamp(0,8000);
+createlamp(1,10000);
+createlamp(0,10000);
+
+
+function updatelamps(velocity){
+  for (var i=0; i<lamps.length;i++){
+    var lamp = lamps[i];
+    lamp.position.z-=velocity;
+    if (lamp.position.z<0){
+      lamp.position.z = 10000;
+    }
+  }
+}
 
 
 
@@ -494,7 +625,7 @@ scene.add(human);
 const radius =  12;  
 const waist = new THREE.DodecahedronGeometry(radius);
 const waistMaterial = new THREE.MeshPhongMaterial({color: 0x6495ED});
-waistMaterial.shininess=10;
+waistMaterial.shininess=0;
 const waistMesh = new THREE.Mesh(waist, waistMaterial);
 human.add(waistMesh);
 
@@ -508,6 +639,7 @@ const heightSegments = 30;
 
 const hips = new THREE.SphereGeometry(hipsRadius, widthSegments, heightSegments);
 const hipsMaterial = new THREE.MeshPhongMaterial({color: 0x6495ED});
+hipsMaterial.shininess = 0;
 const hipsMesh = new THREE.Mesh(hips, hipsMaterial);
 const hipsMesh2 = new THREE.Mesh(hips, hipsMaterial);
 hipsMesh.position.set(radius-2,-radius/2,0);
@@ -525,6 +657,7 @@ const height = 30.0;
 const radialSegments = 11;  
 const leg= new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
 const legMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
+legMaterial.shininess=0;
 const legMesh = new THREE.Mesh(leg, legMaterial);
 const legMesh2 = new THREE.Mesh(leg, legMaterial);
 
@@ -543,6 +676,7 @@ const hKneeSegments = 30;
 
 const knee = new THREE.SphereGeometry(kneeRadius, wKneeSegments, hKneeSegments);
 const kneeMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
+kneeMaterial.shininess = 0;
 const kneeMesh = new THREE.Mesh(knee, kneeMaterial);
 const kneeMesh2 = new THREE.Mesh(knee, kneeMaterial);
 kneeMesh.position.set(0,-height/2-kneeRadius/2,0);
@@ -578,6 +712,7 @@ const slices = 25;
 const stacks = 26;  
 const calf = new THREE.ParametricGeometry(klein, slices, stacks);
 const calfMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
+calfMaterial.shininess = 0;
 const calfMesh = new THREE.Mesh(calf, calfMaterial);
 const calfMesh2 = new THREE.Mesh(calf, calfMaterial);
 calfMesh.rotation.x = radians(90);
@@ -602,6 +737,7 @@ const heightTibia = 20.0;
 const radialSegmentsTibia = 11;  
 const Tibia= new THREE.CylinderGeometry(radiusTopTibia, radiusBottomTibia, heightTibia, radialSegmentsTibia);
 const TibiaMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
+TibiaMaterial.shininess = 0;
 const TibiaMesh = new THREE.Mesh(Tibia, TibiaMaterial);
 const TibiaMesh2 = new THREE.Mesh(Tibia, TibiaMaterial);
 
@@ -622,6 +758,7 @@ const hankleSegments = 30;
 
 const ankle = new THREE.SphereGeometry(ankleRadius, wankleSegments, hankleSegments);
 const ankleMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
+ankleMaterial.shininess = 0;
 const ankleMesh = new THREE.Mesh(ankle, ankleMaterial);
 const ankleMesh2 = new THREE.Mesh(ankle, ankleMaterial);
 ankleMesh.position.set(0,-heightTibia/2-ankleRadius/2,0);
@@ -639,6 +776,7 @@ const depthFoot1 = 5;
 
 const foot1 = new THREE.BoxGeometry(widthFoot1, heightFoot1, depthFoot1)
 const footMaterial = new THREE.MeshPhongMaterial({color: 0xDFFF00});
+footMaterial.shininess = 0;
 const footMesh = new THREE.Mesh(foot1, footMaterial);
 const footMesh2 = new THREE.Mesh(foot1, footMaterial);
 footMesh.position.set(0,-heightFoot1/2-ankleRadius/2,0);
@@ -652,6 +790,7 @@ const depthFoot2 = 15;
 
 const foot2 = new THREE.BoxGeometry(widthFoot2, heightFoot2, depthFoot2)
 const footMaterial2 = new THREE.MeshPhongMaterial({color: 0xDFFF00});
+footMaterial2.shininess = 0;
 const footMeshFront = new THREE.Mesh(foot2, footMaterial2);
 const footMeshFront2 = new THREE.Mesh(foot2, footMaterial2);
 
@@ -714,6 +853,7 @@ const shoulderheightSegments = 30;
 
 const shoulder = new THREE.SphereGeometry(shoulderRadius, shoulderwidthSegments, shoulderheightSegments);
 const shoulderMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
+shoulderMaterial.shininess = 0;
 const shoulderMesh = new THREE.Mesh(shoulder, shoulderMaterial);
 const shoulderMesh2 = new THREE.Mesh(shoulder, shoulderMaterial);
 shoulderMesh.position.set(toptorsoradiusTop+shoulderRadius/2,bottomtorsoheight+toptorsoheight-10,0);
@@ -725,15 +865,16 @@ torso.add(shoulderMesh2);
 
 
 
-//-----------------------------
+//-------------------------------
 //------------UPPER ARMS---------
-//-----------------------------
+//-------------------------------
 const upperArmradiusTop = 3;  
 const upperArmradiusBottom =3;  
 const upperArmheight = 25;  
 const upperArmradialSegments = 50;  
 const upperArm = new THREE.CylinderGeometry(upperArmradiusTop, upperArmradiusBottom, upperArmheight, upperArmradialSegments);
 const upperArmMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
+upperArmMaterial.shininess = 0;
 const upperArmMesh = new THREE.Mesh(upperArm, upperArmMaterial);
 upperArmMesh.position.set(4,-shoulderRadius/2-upperArmheight/2,0);
 
@@ -743,7 +884,7 @@ shoulderMesh.add(upperArmMesh);
 shoulderMesh2.add(upperArmMesh2);
 
 //-----------------------------
-//------------ELBOW---------
+//------------ELBOW------------
 //-----------------------------
 
 const elbowRadius =  4; 
@@ -752,6 +893,7 @@ const elbowheightSegments = 30;
 
 const elbow = new THREE.SphereGeometry(elbowRadius, elbowwidthSegments, elbowheightSegments);
 const elbowMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
+elbowMaterial.shininess = 0;
 const elbowMesh = new THREE.Mesh(elbow, elbowMaterial);
 const elbowMesh2 = new THREE.Mesh(elbow, elbowMaterial);
 elbowMesh.position.set(0,-upperArmheight/2-elbowRadius/2,0);
@@ -771,6 +913,7 @@ const lowerArmheight = 20;
 const lowerArmradialSegments = 50;  
 const lowerArm = new THREE.CylinderGeometry(lowerArmradiusTop, lowerArmradiusBottom, lowerArmheight, lowerArmradialSegments);
 const lowerArmMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
+lowerArmMaterial.shininess = 0;
 const lowerArmMesh = new THREE.Mesh(lowerArm, lowerArmMaterial);
 lowerArmMesh.position.set(0,-lowerArmheight/2-elbowRadius/2,0);
 
@@ -789,6 +932,7 @@ const polsoheightSegments = 30;
 
 const polso = new THREE.SphereGeometry(polsoRadius, polsowidthSegments, polsoheightSegments);
 const polsoMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
+polsoMaterial.shininess = 0;
 const polsoMesh = new THREE.Mesh(polso, polsoMaterial);
 const polsoMesh2 = new THREE.Mesh(polso, polsoMaterial);
 polsoMesh.position.set(0,-lowerArmheight/2-polsoRadius/2,0);
@@ -806,6 +950,7 @@ const depthHand = 5;
 
 const hand = new THREE.BoxGeometry(widthHand, heightHand, depthHand)
 const handMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
+handMaterial.shininess = 0;
 const handMeshFront = new THREE.Mesh(hand, handMaterial);
 const handMeshFront2 = new THREE.Mesh(hand, handMaterial);
 handMeshFront.position.set(0,-heightHand/2-polsoRadius/2,0);
@@ -823,6 +968,7 @@ const neckheight = 8;
 const neckradialSegments = 50;  
 const neck = new THREE.CylinderGeometry(neckradiusTop, neckradiusBottom, neckheight, neckradialSegments);
 const neckMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
+neckMaterial.shininess = 0;
 const neckMesh= new THREE.Mesh(neck, neckMaterial);
 neckMesh.position.set(0,neckheight/2+toptorsoheight/2,0)
 toptorsoMesh.add(neckMesh);
@@ -838,6 +984,7 @@ const headheightSegments = 4;
 
 const head = new THREE.SphereGeometry(headRadius, headwidthSegments, headheightSegments);
 const headMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
+headMaterial.shininess = 0;
 const headMesh = new THREE.Mesh(head, headMaterial);
 const headMesh2 = new THREE.Mesh(head, headMaterial);
 headMesh.position.set(0,neckheight/2+headRadius/2,0);
@@ -1486,14 +1633,15 @@ var callSpawn = setInterval(function(){
 
 
 
-
-
 //################################################### R E N D E R I N G #//###################################################
   function resizeRendererToDisplaySize(renderer) {
     const canvas = renderer.domElement;
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     const needResize = canvas.width !== width || canvas.height !== height;
+    stadiumTexture.offset.x +=0.001;
+    stadium2Texture.offset.x -=0.001;
+    
     if (needResize) {
       renderer.setSize(width, height, false);
     }
