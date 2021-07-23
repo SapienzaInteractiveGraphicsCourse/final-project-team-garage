@@ -6,9 +6,9 @@ import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/l
 function main() {
   const canvas = document.querySelector('#c');
   const renderer = new THREE.WebGLRenderer({canvas});
-  //renderer.setClearColor(0x87ceeb); (DAY)
+  renderer.setClearColor(0x87ceeb); 
   //Night
-  renderer.setClearColor(0x131862); 
+  //renderer.setClearColor(0x131862); 
   renderer.shadowMap.enabled = true;
 
   const fov = 75;
@@ -17,11 +17,19 @@ function main() {
   const far = 10000;
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
   camera.position.set(0, 200, -400);
+  
 
-  // MUOVI A PIACIMENTO
+
+
+
+
+  
   const controls = new OrbitControls(camera, canvas);
-  controls.target.set(0, 0, 0);
+  controls.enabled=false; 
+  controls.target.set(0, 0, 10000);
+
   controls.update();
+ 
   
 
   //degree to radians
@@ -34,26 +42,37 @@ function main() {
 //###################################################### S C E N E ##################################################
 
   const scene = new THREE.Scene();
+  var daylights = [];
+  var nightlights = [];
+  //FOG
+  //scene.fog = new THREE.Fog(0x131862, near, far+5000);
   
   //LIGHTS  
 
   {
-    /*
+    
     const light = new THREE.AmbientLight(0x404040); // soft white light
     scene.add( light );
-    const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.35 );
+    daylights.push(light)
+    const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.4 );
+    daylights.push(directionalLight)
     directionalLight.position.set(-500,1000,0);
     scene.add( directionalLight );
-    const directionalLight2 = new THREE.DirectionalLight( 0xffffff, 0.35);
+    const directionalLight2 = new THREE.DirectionalLight( 0xffffff, 0.4);
+    daylights.push(directionalLight2)
     directionalLight2.position.set(+500,1000,0);
     scene.add( directionalLight2 );
-    const directionalLight3 = new THREE.DirectionalLight( 0xffffff, 0.35);
+    const directionalLight3 = new THREE.DirectionalLight( 0xffffff, 0.4);
+    daylights.push(directionalLight3)
     directionalLight3.position.set(0,1000,-1000);
     scene.add( directionalLight3 );
-    */
+    
     var ambientNightLight = new THREE.AmbientLight( 0x222222);
+    ambientNightLight.visible= false;
+    nightlights.push(ambientNightLight)
     scene.add(ambientNightLight);
     
+  
   }
 
 
@@ -66,13 +85,13 @@ const groundheight = 10000;
 const grounddepth = 1;
 const ground = new THREE.BoxGeometry(groundwidth,groundheight,grounddepth);
 const groundtexture = new THREE.TextureLoader().load( './textures/grass.png' );
-
+const groundtexturebump = new THREE.TextureLoader().load( './textures/grass_bump.png' );
 groundtexture.wrapS = THREE.RepeatWrapping;
 groundtexture.wrapT = THREE.RepeatWrapping;
 groundtexture.repeat.set( 100, 100);
 groundtexture.anisotropy=24;
 
-const groundMaterial = new THREE.MeshPhongMaterial({map: groundtexture});
+const groundMaterial = new THREE.MeshPhongMaterial({map: groundtexture,bumpMap: groundtexturebump});
 groundMaterial.shininess = 0;
 const groundMesh = new THREE.Mesh(ground,groundMaterial);
 groundMesh.position.set(0,0,groundheight*2/4.5);
@@ -176,6 +195,7 @@ groundMesh.add(pavementMesh2);
 
 
 
+
 //###################################################### T R A C K ##################################################
 const trackwidth=  100;  
 const trackheight = 10000; 
@@ -273,7 +293,8 @@ function createObject(interval,pos){
     }
   }
   obstacle.position.z = 10000;
-  
+
+  const postheight =  60;  
   const railwidth =  110;  
   const railheight =  10;  
   const raildepth = 2;  
@@ -282,21 +303,20 @@ function createObject(interval,pos){
   const railMaterial = new THREE.MeshPhongMaterial({map: railtexture});
   const railMesh = new THREE.Mesh(rail, railMaterial);
 
-  railMesh.position.set(0,railwidth/2-10,0);
+  railMesh.position.set(0,postheight,0);
   obstacle.add(railMesh);
 
   const postwidth =  10;  
-  const postheight =  50;  
   const postdepth = 2;  
 
   const post= new THREE.BoxGeometry(postwidth, postheight, postdepth);
   const postMaterial = new THREE.MeshPhongMaterial({color: 0xFFFFFF});
   const postMesh = new THREE.Mesh(post, postMaterial);
   const postMesh2 = new THREE.Mesh(post, postMaterial);
-  postMesh.position.set(-railwidth/2+10,-postheight/2+railheight/2,-postdepth);
-  postMesh2.position.set(railwidth/2-10,-postheight/2+railheight/2,-postdepth);
-  railMesh.add(postMesh);
-  railMesh.add(postMesh2);
+  postMesh.position.set(-railwidth/2+10,postheight/2,-postdepth);
+  postMesh2.position.set(railwidth/2-10,postheight/2,-postdepth);
+  obstacle.add(postMesh);
+  obstacle.add(postMesh2);
 
 
   const brailwidth =  100;  
@@ -396,7 +416,7 @@ function createObject1(interval,pos){
   const brailMaterial = new THREE.MeshPhongMaterial({map: railtexture});
   const brailMesh = new THREE.Mesh(brail, brailMaterial);
   const brailMesh2 = new THREE.Mesh(brail, brailMaterial);
-  brailMesh.position.set(0,postheight/1.5,-braildepth/2);
+  brailMesh.position.set(0,postheight*7/10,-braildepth/2);
   obstacle.add(brailMesh);
 
   createjs.Tween.get(obstacle.position).to({z:-500}, interval).call(function(){scene.remove(obstacle);highobstacles.shift()});
@@ -414,11 +434,13 @@ for(var i=0; i<spectators.length; i++) {
   createjs.Tween.get(spectators[i].position, {override:true}).to(spectators[i].position.z,interval);
 }
 createjs.Tween.get(groundtexture.offset,{override:true}).to({y:groundtexture.offset.y-20}, 0)
-createjs.Tween.get(bannerMesh.position,{override:true}).to({z:bannerMesh.position.z-5000},0);
-createjs.Tween.get(bannerMesh2.position,{override:true}).to({z:bannerMesh2.position.z+5000},0);
+createjs.Tween.get(bannerMesh.position,{override:true}).to({z:bannerMesh.position.z},0);
+createjs.Tween.get(bannerMesh2.position,{override:true}).to({z:bannerMesh2.position.z},0);
 
- obstacles = [];
- highobstacles = [];
+for (var i=0; i<displays.length;i++){
+  createjs.Tween.get(displays[i].position, {override:true}).to(displays[i].position.z,interval);
+}
+
 }
 //#################################################### OBJECT CREATE ########################################################
 
@@ -471,7 +493,8 @@ function dist3d (v1, v2 )
 }
 
 
-function checkCollisions(){
+function checkCollisions(god){
+  if (!god){
   var dist = 150;
   if (dead1){return}
   for (var i = 0; i < obstacles.length ; i++){
@@ -492,14 +515,17 @@ function checkCollisions(){
         dead1=true;
     }
 }
+  }
 }
 
 //##################################################### LAMP #################################################################
 var lamps = [];
+var lampsObject = [];
+
 function createlamp(side,posz){
   var radiusTop = 40; 
   var radiusBottom = 40;  
-  var height = 1000;  
+  var height = 1500;  
   var height2 = 500;
   var radius2 = 20;
   var radialSegments = 12;  
@@ -567,7 +593,8 @@ else{
 
 
 
-const spotLight = new THREE.SpotLight( 0xFFFFFF,2,6500,radians(90),1);
+const spotLight = new THREE.SpotLight( 0xFFFFFF,2.5,6500,radians(90),1);
+spotLight.visible=false;
 spotLight.position.set( 0, 500, 0);
 //const helper = new THREE.SpotLightHelper(spotLight)
 
@@ -579,7 +606,7 @@ spotLight.shadow.mapSize.height = 512;
 spotLight.shadow.camera.near = 500;
 spotLight.shadow.camera.far = 4000;
 spotLight.shadow.camera.fov = 0;
-
+nightlights.push(spotLight);
 mesh.add( spotLight );
 
 }
@@ -610,6 +637,81 @@ function updatelamps(velocity){
     }
   }
 }
+
+//######################################################DISPLAY###############################################################
+var displays = []
+
+function createDisplay(xpos,velocity){
+  var displayObject = new THREE.Object3D();
+  scene.add(displayObject);
+  displayObject.position.x = xpos;
+  displayObject.position.z = 10000;
+  //box value
+  displays.push(displayObject);
+  var standwidth = 1000;
+  var standheight = 100;
+  var standdepth = 100;
+
+
+  var displayradius = 200;  
+  var displaytubeRadius = 20;  
+  var displayradialSegments = 80;  
+  var displatubularSegments = 240;  
+  var displayMaterial = new THREE.MeshPhongMaterial({color: 0xF4C300});
+  var display = new THREE.TorusGeometry(displayradius, displaytubeRadius,displayradialSegments, displatubularSegments);
+  var displayMesh = new THREE.Mesh(display, displayMaterial);
+  displayMesh.position.set(displayradius+displayradius/4,displayradius+standheight+displaytubeRadius/2,0);
+  displayObject.add(displayMesh);
+
+  //CIRCLE 2
+
+  var displayMaterial2 = new THREE.MeshPhongMaterial({color: 0x009F3D});
+  var display2 = new THREE.TorusGeometry(displayradius, displaytubeRadius,displayradialSegments, displatubularSegments);
+  var displayMesh2 = new THREE.Mesh(display2, displayMaterial2);
+  displayMesh2.position.set(-displayradius-displayradius/4,displayradius+standheight+displaytubeRadius/2,0);
+  displayObject.add(displayMesh2)
+  
+  //CIRCLE 3
+
+  var displayMaterial3 = new THREE.MeshPhongMaterial({color: 0x000000});
+  var display3 = new THREE.TorusGeometry(displayradius, displaytubeRadius,displayradialSegments, displatubularSegments);
+  var displayMesh3 = new THREE.Mesh(display3, displayMaterial3);
+  displayMesh3.position.set(0,displayradius+displayradius*6/7+standheight+displaytubeRadius/2,displaytubeRadius);
+  displayObject.add(displayMesh3)
+
+  //CIRCLE 4
+
+  var displayMaterial4 = new THREE.MeshPhongMaterial({color: 0x0085C7});
+  var display4 = new THREE.TorusGeometry(displayradius, displaytubeRadius,displayradialSegments, displatubularSegments);
+  var displayMesh4 = new THREE.Mesh(display4, displayMaterial4);
+  displayMesh4.position.set(displayradius+displayradius+displayradius/2,displayradius+displayradius*6/7+standheight+displaytubeRadius/2,displaytubeRadius);
+  displayObject.add(displayMesh4)
+
+  //CIRCLE 5
+
+  var displayMaterial5 = new THREE.MeshPhongMaterial({color: 0xDF0024});
+  var display5 = new THREE.TorusGeometry(displayradius, displaytubeRadius,displayradialSegments, displatubularSegments);
+  var displayMesh5 = new THREE.Mesh(display5, displayMaterial5);
+  displayMesh5.position.set(-displayradius-displayradius-displayradius/2,displayradius+displayradius*6/7+standheight+displaytubeRadius/2,displaytubeRadius);
+  displayObject.add(displayMesh5)
+
+  //STAND
+  var stand= new THREE.BoxGeometry(standwidth, standheight, standdepth);
+  var standMaterial = new THREE.MeshPhongMaterial({color: 0xFFFFFF});
+  var standMesh = new THREE.Mesh(stand, standMaterial);
+  standMesh.position.set(0,standheight/2,0);
+  displayObject.add(standMesh);
+  createjs.Tween.get(displayObject.position).to({z:-500}, velocity).call(function(){scene.remove(displayObject),displays.shift()});
+  
+}
+
+
+createDisplay(2000,25000);
+createDisplay(-2000,25000);
+
+
+
+
 
 
 
@@ -653,7 +755,7 @@ waistMesh.add(hipsMesh2);
 //-----------------------------
 const radiusTop = 6;  
 const radiusBottom = 3;  
-const height = 30.0;  
+const height = 35.0;  
 const radialSegments = 11;  
 const leg= new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
 const legMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
@@ -733,7 +835,7 @@ kneeMesh2.add(calfMesh2);
 //-----------------------------
 const radiusTopTibia = 3;  
 const radiusBottomTibia = 2;  
-const heightTibia = 20.0;  
+const heightTibia = 30.0;  
 const radialSegmentsTibia = 11;  
 const Tibia= new THREE.CylinderGeometry(radiusTopTibia, radiusBottomTibia, heightTibia, radialSegmentsTibia);
 const TibiaMaterial = new THREE.MeshPhongMaterial({color: 0xCC8866});
@@ -995,6 +1097,19 @@ human.position.set(0,radius+height+heightTibia+heightFoot1+2.5+grounddepth+track
 
 
 
+//HEADCAMERA
+function makeCamera(fov) {
+  const aspect = 2;  // the canvas default
+  const zNear = 1;
+  const zFar = 10000;
+  return new THREE.PerspectiveCamera(fov, aspect, zNear, zFar);
+}
+const tankCameraFov = 75;
+const camera2 = makeCamera(tankCameraFov);
+camera2.position.y = 80;
+camera2.position.z = -15;
+camera2.lookAt(0,1,10000)
+human.add(camera2);
 
 
 //###################################################### E V E N T - L I S T E N E R ##################################################
@@ -1334,12 +1449,16 @@ function run(){
     createjs.Tween.get(camera.position, {loop:-1}).to({y:camera.position.y + 5}, interval/2).to({y:camera.position.y}, interval/2);
     createjs.Tween.get(camera.rotation, {loop:-1}).to({y: radians(0.1)}, interval).to({y:radians(-0.1)}, interval);
   
+
+
+    createjs.Tween.get(camera2.position, {loop:-1}).to({y:camera2.position.y + 5}, interval/2).to({y:camera2.position.y}, interval/2);
+    createjs.Tween.get(camera2.rotation, {loop:-1}).to({y: radians(0.1)}, interval).to({y:radians(-0.1)}, interval);
     
-    createjs.Tween.get(hipsMesh.rotation, {loop:-1}).to({x:radians(-75)}, interval/2).to({x:radians(75)}, interval).to({x:radians(0)}, interval/2);
-    createjs.Tween.get(hipsMesh2.rotation, {loop:-1}).to({x:radians(75)}, interval/2).to({x:radians(-75)},interval).to({x:radians(0)}, interval/2);
-    createjs.Tween.get(waistMesh.position, {loop:-1}).to({y:5}, interval/2).to({y:0},interval/2);
-    createjs.Tween.get(kneeMesh.rotation, {loop:-1}).to({x:radians(75)}, interval).to({x:radians(0)}, interval);
-    createjs.Tween.get(kneeMesh2.rotation, {loop:-1}).to({x:radians(75)}, interval).to({x:radians(0)}, interval);
+    createjs.Tween.get(hipsMesh.rotation, {loop:-1}).to({x:radians(-85)}, interval/2).to({x:radians(75)}, interval).to({x:radians(0)}, interval/2);
+    createjs.Tween.get(hipsMesh2.rotation, {loop:-1}).to({x:radians(85)}, interval/2).to({x:radians(-75)},interval).to({x:radians(0)}, interval/2);
+    createjs.Tween.get(waistMesh.position, {loop:-1}).to({y:20}, interval/2).to({y:0},interval/2);
+    createjs.Tween.get(kneeMesh.rotation, {loop:-1}).to({x:radians(90)}, interval).to({x:radians(0)}, interval);
+    createjs.Tween.get(kneeMesh2.rotation, {loop:-1}).to({x:radians(90)}, interval).to({x:radians(0)}, interval);
     createjs.Tween.get(ankleMesh.rotation, {loop:-1}).to({x:radians(-15)}, interval).to({x:radians(0)}, interval/2);
     createjs.Tween.get(ankleMesh2.rotation, {loop:-1}).to({x:radians(-15)}, interval).to({x:radians(0)}, interval/2);
     createjs.Tween.get(torso.rotation, {loop:-1}).to({y:radians(20)},interval/2).to({y:radians(-20)},interval).to({y:radians(0)},interval/2);
@@ -1363,6 +1482,9 @@ function jump(){
   
     createjs.Tween.get(camera.position).to({y:camera.position.y + 100}, jinterval/2).to({y:camera.position.y}, jinterval/2);
 
+    createjs.Tween.get(camera2.position).to({y:camera2.position.y + 100}, jinterval/2).to({y:camera2.position.y}, jinterval/2);
+    
+
     createjs.Tween.get(hipsMesh.rotation).to({x:radians(-120)}, jinterval/2).to({x:radians(0)},jinterval/2);
     createjs.Tween.get(hipsMesh2.rotation).to({x:radians(90)}, jinterval/2).to({x:radians(0)},jinterval/2);
     createjs.Tween.get(waistMesh.position).to({y:100}, jinterval/2).to({y:0},jinterval/2);
@@ -1377,7 +1499,8 @@ function jump(){
 function jump2(){
   var jinterval = 600
     createjs.Tween.get(camera.position).to({y:camera.position.y + 100}, jinterval/2).to({y:camera.position.y}, jinterval/2);
-
+    createjs.Tween.get(camera2.position).to({y:camera2.position.y + 100}, jinterval/2).to({y:camera2.position.y}, jinterval/2);
+    
     createjs.Tween.get(hipsMesh.rotation).to({x:radians(-120)}, jinterval/2).to({x:radians(0)},jinterval/2);
     createjs.Tween.get(hipsMesh2.rotation).to({x:radians(90)}, jinterval/2).to({x:radians(0)},jinterval/2);
     createjs.Tween.get(waistMesh.position).to({y:100}, jinterval/2).to({y:0},jinterval/2);
@@ -1395,6 +1518,8 @@ function jump2(){
 function slip(){
     var interval = 600
     createjs.Tween.get(camera.position).to({y:camera.position.y - 100}, interval/2).to({y:camera.position.y}, interval/2);
+    createjs.Tween.get(camera2.position).to({y:camera2.position.y - 100}, interval/2).to({y:camera2.position.y}, interval/2);
+
     createjs.Tween.get(waistMesh.position).to({y:-60}, interval/2).to({y:0},interval/4);
     createjs.Tween.get(waistMesh.rotation).to({x:radians(-90)}, interval/2).to({x:radians(0)},interval/2);
     createjs.Tween.get(torso.rotation).to({x:radians(30)}, interval/2).to({x:radians(0)},interval/2);
@@ -1410,16 +1535,19 @@ function slip(){
 function slip1(){
   var interval = 600
   createjs.Tween.get(camera.position).to({y:camera.position.y - 100}, interval/2).to({y:camera.position.y}, interval/2);
-
+createjs.Tween.get(camera2.position).to({y:camera2.position.y - 100}, interval/2).to({y:camera2.position.y}, interval/2);
   createjs.Tween.get(waistMesh.rotation).to({x:radians(360)}, interval).to({x:radians(0)}, 0);
+
+  
+
 
   createjs.Tween.get(waistMesh.position).to({y:-10}, interval/2).to({y:0},interval/4);
   //createjs.Tween.get(waistMesh.rotation).to({x:radians(-90)}, interval/2).to({x:radians(0)},interval/2);
   createjs.Tween.get(torso.rotation).to({x:radians(30)}, interval/2).to({x:radians(0)},interval/2);
-  createjs.Tween.get(hipsMesh.rotation).to({x:radians(-80)}, interval/2).to({x:radians(0)},interval/2);
-  createjs.Tween.get(hipsMesh2.rotation).to({x:radians(-80)}, interval/2).to({x:radians(0)},interval/2);
-  createjs.Tween.get(kneeMesh.rotation).to({x:radians(90)}, interval/2).to({x:radians(0)}, interval/2)
-  createjs.Tween.get(kneeMesh2.rotation).to({x:radians(90)}, interval/2).to({x:radians(0)}, interval/2).call(function(){slipping=false;})
+  createjs.Tween.get(hipsMesh.rotation).to({x:radians(-150)}, interval/2).to({x:radians(0)},interval/2);
+  createjs.Tween.get(hipsMesh2.rotation).to({x:radians(-150)}, interval/2).to({x:radians(0)},interval/2);
+  createjs.Tween.get(kneeMesh.rotation).to({x:radians(180)}, interval/2).to({x:radians(0)}, interval/2)
+  createjs.Tween.get(kneeMesh2.rotation).to({x:radians(180)}, interval/2).to({x:radians(0)}, interval/2).call(function(){slipping=false;})
   
 
 }
@@ -1434,23 +1562,28 @@ function left(){
   var interval = 200;
   createjs.Tween.get(waistMesh.position).to({x:waistMesh.position.x + 100}, interval).call(function(){moving=false;});
   createjs.Tween.get(camera.position).to({x:camera.position.x + 100}, interval);
+
+  createjs.Tween.get(camera2.position).to({x:camera2.position.x + 100}, interval);
+
   createjs.Tween.get(waistMesh.rotation).to({y:radians(45)}, interval/2).to({y:radians(0)},interval/2);
   createjs.Tween.get(torso.rotation).to({z:radians(45)}, interval/2).to({z:radians(0)},interval/2);
   
   createjs.Tween.get(waistMesh.position).to({x:waistMesh.position.x + 100}, interval).call(function(){moving=false;});
   createjs.Tween.get(camera.position).to({x:camera.position.x + 100}, interval);
+  createjs.Tween.get(camera2.position).to({x:camera2.position.x + 100}, interval);
 }
 
 function left1(){
   var interval = 200;
   createjs.Tween.get(waistMesh.position).to({x:waistMesh.position.x + 100}, interval).call(function(){moving=false;});
   createjs.Tween.get(camera.position).to({x:camera.position.x + 100}, interval);
+  createjs.Tween.get(camera2.position).to({x:camera2.position.x + 100}, interval);
   createjs.Tween.get(waistMesh.rotation).to({y:radians(45)}, interval/2).to({y:radians(0)},interval/2);
   createjs.Tween.get(torso.rotation).to({z:radians(45)}, interval/2).to({z:radians(0)},interval/2);
   
   createjs.Tween.get(waistMesh.position).to({x:waistMesh.position.x + 100}, interval).call(function(){moving=false;});
   createjs.Tween.get(camera.position).to({x:camera.position.x + 100}, interval);
-
+  createjs.Tween.get(camera2.position).to({x:camera2.position.x + 100}, interval);
   createjs.Tween.get(shoulderMesh.rotation).to({z:radians(75)}, interval).to({z:radians(0)},interval);
   createjs.Tween.get(shoulderMesh2.rotation).to({z:radians(-75)}, interval).to({z:radians(0)},interval);
 }
@@ -1466,7 +1599,7 @@ function right1(){
   createjs.Tween.get(waistMesh.position).to({x:waistMesh.position.x - 100}, interval).call(function(){moving=false;});
 
   createjs.Tween.get(camera.position).to({x:camera.position.x - 100}, interval)
-
+  createjs.Tween.get(camera2.position).to({x:camera2.position.x - 100}, interval)
   createjs.Tween.get(waistMesh.rotation).to({y:radians(-45)}, interval/2).to({y:radians(0)},interval/2);
   createjs.Tween.get(torso.rotation).to({z:radians(-45)}, interval/2).to({z:radians(0)},interval/2);
 
@@ -1480,7 +1613,7 @@ function right(){
   createjs.Tween.get(waistMesh.position).to({x:waistMesh.position.x - 100}, interval).call(function(){moving=false;});
 
   createjs.Tween.get(camera.position).to({x:camera.position.x - 100}, interval)
-
+  createjs.Tween.get(camera2.position).to({x:camera2.position.x - 100}, interval)
   createjs.Tween.get(waistMesh.rotation).to({y:radians(-45)}, interval/2).to({y:radians(0)},interval/2);
   createjs.Tween.get(torso.rotation).to({z:radians(-45)}, interval/2).to({z:radians(0)},interval/2);
 }
@@ -1494,6 +1627,10 @@ function dead(){
 
   createjs.Tween.get(camera.position,{override:true}).to({y:camera.position.y});
   createjs.Tween.get(camera.rotation,{override:true}).to({y: radians(0)});
+
+
+  createjs.Tween.get(camera2.position,{override:true}).to({y:camera2.position.y});
+  createjs.Tween.get(camera2.rotation,{override:true}).to({y: radians(0)});
 
   createjs.Tween.get(texture.offset,{override:true}).to({y:texture.offset.y-10}, 0).to({y:texture.offset.y+10}, 0);
   createjs.Tween.get(texture1.offset,{override:true}).to({y:texture1.offset.y-10}, 0).to({y:texture1.offset.y+10}, 0);
@@ -1512,6 +1649,8 @@ function dead(){
   createjs.Tween.get(shoulderMesh2.rotation,{override:true}).to({x:radians(-75)}, interval);
   createjs.Tween.get(elbowMesh.rotation,{override:true}).to({x:radians(0)}, interval/2);
   createjs.Tween.get(elbowMesh2.rotation,{override:true}).to({x:radians(0)}, interval/2);
+
+
   
 
   interval = 1000;
@@ -1529,68 +1668,70 @@ function dead(){
 //####### TIMERS #############//////
 
 var velocity = 8000;
+
 //1 left, 2 center, 3 right
-var callSpawn = setInterval(function(){
-  var val =  Math.floor(Math.random() * (10));
-  //low
-  if ( val ==0){ //3
-    createObject(velocity,1);
-    createObject(velocity,2);
-    createObject(velocity,3);
-  }
-  if (val == 1){
-    createObject(velocity,1);
-    createObject(velocity,2);
-  }
-
-  if (val==2){
-    createObject(velocity,1);
-    createObject1(velocity,2);
-    createObject(velocity,3);
-  }
+function creatOstacoli(){
+    var val =  Math.floor(Math.random() * (10));
+    //low
+    if ( val ==0){ //3
+      createObject(velocity,1);
+      createObject(velocity,2);
+      createObject(velocity,3);
+    }
+    if (val == 1){
+      createObject(velocity,1);
+      createObject(velocity,2);
+    }
   
-  if (val==3){
-    createObject1(velocity,2);
-    createObject1(velocity,3);;
-  }
+    if (val==2){
+      createObject(velocity,1);
+      createObject1(velocity,2);
+      createObject(velocity,3);
+    }
+    
+    if (val==3){
+      createObject1(velocity,2);
+      createObject1(velocity,3);;
+    }
+    
+    if (val==4){
+      createObject(velocity,0);
+    }
   
-  if (val==4){
-    createObject(velocity,0);
-  }
-
-
-  if (val==5){
-    createObject1(velocity,1);
-    createObject(velocity,2);
-    createObject1(velocity,3);}
-
-  if (val==6){
-    createObject1(velocity,1);
-    createObject1(velocity,2);
-  }
-
-  if (val==7){
-    createObject1(velocity,1);
-    createObject1(velocity,3);
-  }
   
-  //CASI RARI 
-
-  if (val==8){
-    createObject1(velocity,1);
-    createObject1(velocity,2);
-    createObject1(velocity,3);
-  }
+    if (val==5){
+      createObject1(velocity,1);
+      createObject(velocity,2);
+      createObject1(velocity,3);}
   
-  if (val==9){
-    createObject(velocity,1);
-    createObject1(velocity,2);
+    if (val==6){
+      createObject1(velocity,1);
+      createObject1(velocity,2);
+    }
+  
+    if (val==7){
+      createObject1(velocity,1);
+      createObject1(velocity,3);
+    }
+    
+    //CASI RARI 
+  
+    if (val==8){
+      createObject1(velocity,1);
+      createObject1(velocity,2);
+      createObject1(velocity,3);
+    }
+    
+    if (val==9){
+      createObject(velocity,1);
+      createObject1(velocity,2);
+  
+    }
+}
 
-  }
- 
 
 
-  },2000);
+var callSpawn = setInterval(creatOstacoli,2000);
 
   var colors = [
     0x82E0AA,
@@ -1609,57 +1750,250 @@ var callSpawn = setInterval(function(){
     0x00FFFF
   ]
 
-
-  var spectatorSpawn = setInterval(function(){
+  function Sspawn(){
     var maglietta = colors[Math.floor(Math.random()*(14))];
     var mutande = colors[Math.floor(Math.random()*(14))];
     var scarpe = colors[Math.floor(Math.random()*(14))];
     var pos = Math.floor(Math.random()*(2));
     var type = Math.floor(Math.random()*(4));
     createSpectator(100,10000,maglietta,mutande,scarpe,type,pos);
-  },200);
+  }
 
-  
+  var spectatorSpawn = setInterval(Sspawn,200);
 
+  var velocity1 = 25000;
+  var displaySpawn = setInterval(function(){
+    createDisplay(2000,velocity1);
+    createDisplay(-2000,velocity1);
+  },25000);
 
 
 
 
   function stopspawn() {
+    clearInterval(displaySpawn);
     clearInterval(spectatorSpawn);
     clearInterval(callSpawn);
+}
+
+//######################################################### GUI ################################################################
+
+var day = false;
+function changeDaytime(type){
+  day  = !day;
+  if (day){
+    renderer.setClearColor(0x87ceeb); 
+    for (var i=0;i<daylights.length;i++){
+      daylights[i].visible=true;
+    }
+    for (var i=0;i<nightlights.length;i++){
+      nightlights[i].visible=false;
+    }
+  }
+  else{
+    renderer.setClearColor(0x131862); 
+    for (var i=0;i<daylights.length;i++){
+      daylights[i].visible=false;
+    }
+    for (var i=0;i<nightlights.length;i++){
+      nightlights[i].visible=true;
+    }
+  }
+}
+
+//var obstacles = []
+//var highobstacles = []
+
+function removeObstacles(){
+  for (var i=0; i<spectators.length;i++){
+    scene.remove(spectators[i]);
+  }
+  for (var i=0; i<obstacles.length;i++){
+    scene.remove(obstacles[i]);
+  }
+  for (var i=0; i<highobstacles.length;i++){
+    scene.remove(highobstacles[i]);
+  }
+  obstacles = [];
+  highobstacles = [];
+  
 }
 
 
 
 
+
+
+
+function restart(){
+  var maglietta = obj.jersey.toString(16);
+  var pantaloni = obj.pants.toString(16);
+  var shoes = obj.shoes.toString(16);
+  var fp = obj.first_person;
+  document.location.href = "?var1="+maglietta+"&var2="+pantaloni+"&var3="+shoes+"&var4="+day+"&var5="+fp;
+}
+
+function findGetParameter(parameterName) {
+  var result = null,
+      tmp = [];
+  location.search
+      .substr(1)
+      .split("&")
+      .forEach(function (item) {
+        tmp = item.split("=");
+        if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+      });
+  return result;
+}
+
+
+
+
+var obj = {
+  god_mode: false,
+  first_person: false,
+
+  maxSize: 6.0,
+  speed: 5,
+
+  height: 10,
+  noiseStrength: 10.2,
+  growthSpeed: 0.2,
+
+  type: 'day',
+
+
+  Restart: restart,
+  
+
+  change_day_time: changeDaytime,
+
+  jersey: 0x6495ED, 
+  pants: 0x6495ED, 
+  shoes: 0xDFFF00 
+};
+
+var m = findGetParameter("var1");
+var p = findGetParameter("var2");
+var s = findGetParameter("var3");
+var d = findGetParameter("var4");
+var g = findGetParameter("var5");
+if (m!=null){obj.jersey=parseInt(m, 16);}
+if (p!=null){obj.pants=parseInt(p, 16);}
+if (s!=null){obj.shoes=parseInt(s,16);}
+if (d!=null){
+  if (d=="true"){
+    day=false;
+  }
+  else{
+    day=true;
+  }
+}
+if (g!=null){
+  if (g=="true"){
+    obj.first_person=true;
+  }
+  else{
+    obj.first_person=false;
+  }
+}
+changeDaytime();
+console.log(day);
+
+
+
+
+
+
+var gui = new dat.gui.GUI();
+
+
+gui.add(obj, 'god_mode');
+gui.add(obj, 'first_person');
+gui.add(obj, 'change_day_time');
+gui.add(obj,'Restart');
+var f1 = gui.addFolder('Customize Outfit');
+f1.addColor(obj, 'jersey');
+f1.addColor(obj, 'pants');
+f1.addColor(obj, 'shoes');
+
+
+
+
+
+function updateOutfit(){
+  bottomtorsoMaterial.color.setHex(obj.jersey);
+  toptorsoMaterial.color.setHex(obj.jersey);
+
+  waistMaterial.color.setHex(obj.pants);
+  hipsMaterial.color.set(obj.pants);
+
+  footMaterial.color.setHex(obj.shoes);
+  footMaterial2.color.setHex(obj.shoes);
+
+
+}
+
+function updateStadium(){
+  if (!dead1){
+    stadiumTexture.offset.x +=0.001;
+    stadium2Texture.offset.x -=0.001;
+  }
+}
+
+
+
+
+renderer.render(scene, camera2);
+
+//############STATS##############
+
+var stats = new Stats();
+stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild( stats.dom );
+
 //################################################### R E N D E R I N G #//###################################################
   function resizeRendererToDisplaySize(renderer) {
+    stats.begin();
     const canvas = renderer.domElement;
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     const needResize = canvas.width !== width || canvas.height !== height;
-    stadiumTexture.offset.x +=0.001;
-    stadium2Texture.offset.x -=0.001;
+    
     
     if (needResize) {
       renderer.setSize(width, height, false);
     }
     return needResize;
   }
-
+  
+  
   function render(time) {
     time *= 0.001;
-    //checkCollisions();
+    
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
     }
 //##############################################
-    renderer.render(scene, camera);
-
-
+    if (obj.first_person==true){
+    renderer.render(scene, camera2);
+    headMesh.visible=false;
+toptorsoMesh.visible=false;
+bottomtorsoMesh.visible=false;
+    }
+    else{
+      renderer.render(scene, camera);
+      headMesh.visible=true;
+toptorsoMesh.visible=true;
+bottomtorsoMesh.visible=true;
+    }
+    
+    updateStadium();
+    checkCollisions(obj.god_mode);
+    updateOutfit()
+    stats.end();
     requestAnimationFrame(render);
   }
 
