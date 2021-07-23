@@ -5,7 +5,7 @@ import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/l
 
 function main() {
   const canvas = document.querySelector('#c');
-  const renderer = new THREE.WebGLRenderer({canvas});
+  const renderer = new THREE.WebGLRenderer({canvas, antialias: true });
   renderer.setClearColor(0x87ceeb); 
   //Night
   //renderer.setClearColor(0x131862); 
@@ -21,12 +21,15 @@ function main() {
 
 
 
-
+  var started = false;
 
   
   const controls = new OrbitControls(camera, canvas);
   controls.enabled=false; 
   controls.target.set(0, 0, 10000);
+
+  //controls.enabled=true; 
+  //controls.target.set(0, 0, 0);
 
   controls.update();
  
@@ -99,7 +102,7 @@ groundMesh.rotation.x = radians(-90);
 scene.add(groundMesh);
 
 
-createjs.Tween.get(groundtexture.offset,{loop:-1}).to({y:groundtexture.offset.y-20}, 50).to({y:groundtexture.offset.y+20}, 50);
+
 
 
 //###################################################### S T A D I U M (STADIUM) ##################################################
@@ -203,6 +206,7 @@ const trackdepth =  1.0;
 
 const track= new THREE.BoxGeometry(trackwidth, trackheight, trackdepth);
 const texture = new THREE.TextureLoader().load( './textures/track2.png' );
+const texture_bump = new THREE.TextureLoader().load( './textures/track2_bump.png' );
 texture.wrapS = THREE.RepeatWrapping;
 texture.wrapT = THREE.RepeatWrapping;
 texture.repeat.set( 1, 60);
@@ -210,29 +214,29 @@ texture.anisotropy=24;
 
 
 const texture1 = new THREE.TextureLoader().load( './textures/track2.png' );
+const texture1_bump = new THREE.TextureLoader().load( './textures/track2_bump.png' );
 texture1.wrapS = THREE.RepeatWrapping;
 texture1.wrapT = THREE.RepeatWrapping;
 texture1.repeat.set( 1, 60);
 texture1.anisotropy=24;
 
 const texture2 = new THREE.TextureLoader().load( './textures/track2.png' );
+const texture2_bump = new THREE.TextureLoader().load( './textures/track2_bump.png' );
 texture2.wrapS = THREE.RepeatWrapping;
 texture2.wrapT = THREE.RepeatWrapping;
 texture2.repeat.set( 1, 60);
 texture2.anisotropy=24;
 
-createjs.Tween.get(texture.offset,{loop:-1}).to({y:texture.offset.y-20}, 50).to({y:texture.offset.y+20}, 50);
-createjs.Tween.get(texture1.offset,{loop:-1}).to({y:texture1.offset.y-20}, 50).to({y:texture1.offset.y+20}, 50);
-createjs.Tween.get(texture2.offset,{loop:-1}).to({y:texture2.offset.y-20}, 50).to({y:texture2.offset.y+10}, 50);
 
 
 
 
 
 
-const trackMaterial = new THREE.MeshPhongMaterial({map: texture1});
-const trackMaterial2 = new THREE.MeshPhongMaterial({map: texture});
-const trackMaterial3 = new THREE.MeshPhongMaterial({map: texture2});
+
+const trackMaterial = new THREE.MeshPhongMaterial({map: texture1,bumpMap: texture_bump});
+const trackMaterial2 = new THREE.MeshPhongMaterial({map: texture, bumpMap: texture1_bump});
+const trackMaterial3 = new THREE.MeshPhongMaterial({map: texture2, bumpMap: texture2_bump});
 trackMaterial.shininess = 10;
 trackMaterial2.shininess = 10;
 trackMaterial3.shininess = 10;
@@ -479,8 +483,7 @@ bannerMesh2.rotation.y = radians(-90);
 scene.add(bannerMesh);
 scene.add(bannerMesh2);
 //createjs.Tween.get(sapientiatexture.offset,{loop:-1}).to({x:sapientiatexture.offset.x-10000},10000);
-createjs.Tween.get(bannerMesh.position,{loop:-1}).to({z:bannerMesh.position.z-5000},4000);
-createjs.Tween.get(bannerMesh2.position,{loop:-1}).to({z:bannerMesh2.position.z-5000},4000);
+
 
 
 
@@ -499,7 +502,7 @@ function checkCollisions(god){
   if (dead1){return}
   for (var i = 0; i < obstacles.length ; i++){
       if ( Math.abs(obstacles[i].position.x - waistMesh.position.x )<50 && jumping == false && Math.abs(obstacles[i].position.z)<dist){
-          console.log("hit");
+        
           stopspawn();
           dead();
           stopObstacles();
@@ -508,7 +511,7 @@ function checkCollisions(god){
   }
   for (var i = 0; i < highobstacles.length ; i++){
     if ( Math.abs(highobstacles[i].position.x - waistMesh.position.x )<50 && slipping == false && Math.abs(highobstacles[i].position.z)<dist){
-        console.log("hit");
+        
         stopspawn();
         dead();
         stopObstacles();
@@ -520,7 +523,7 @@ function checkCollisions(god){
 
 //##################################################### LAMP #################################################################
 var lamps = [];
-var lampsObject = [];
+var lampsMaterial = [];
 
 function createlamp(side,posz){
   var radiusTop = 40; 
@@ -549,7 +552,7 @@ function createlamp(side,posz){
   var lampMesh2  = new THREE.Mesh(topCylinder,material);
   lampMesh.position.y = height/2;
   lampMesh2.position.y = height2
-
+  
 
 
 
@@ -569,8 +572,7 @@ var geometry2 = new THREE.BoxGeometry(width, height, depth);
 var lighttexture = new THREE.TextureLoader().load( './textures/lamp.png' );
 lighttexture.anisotropy=24;
 var  material2 = new THREE.MeshStandardMaterial({emissive:0xFFFFFF,emissiveMap: lighttexture});
-
-
+lampsMaterial.push(material2);
 var mesh = new THREE.Mesh(geometry2,material2);
 var mesh2 = new THREE.Mesh(geometry2,material);
 mesh.position.y = height2+100;
@@ -614,6 +616,8 @@ mesh.add( spotLight );
 
 
 
+
+
 createlamp(1,0);
 createlamp(0,0);
 createlamp(1,2000);
@@ -627,6 +631,11 @@ createlamp(0,8000);
 createlamp(1,10000);
 createlamp(0,10000);
 
+function switchLamps(color){
+  for (var i=0;i<lampsMaterial.length;i++){
+    lampsMaterial[i].emissive.setHex(color)
+  }
+}
 
 function updatelamps(velocity){
   for (var i=0; i<lamps.length;i++){
@@ -706,8 +715,7 @@ function createDisplay(xpos,velocity){
 }
 
 
-createDisplay(2000,25000);
-createDisplay(-2000,25000);
+
 
 
 
@@ -1093,7 +1101,7 @@ headMesh.position.set(0,neckheight/2+headRadius/2,0);
 
 neckMesh.add(headMesh);
 
-human.position.set(0,radius+height+heightTibia+heightFoot1+2.5+grounddepth+trackdepth+10,0);
+human.position.set(0,radius+height+heightTibia+heightFoot1+2.5+grounddepth+trackdepth+2.5,0);
 
 
 
@@ -1123,8 +1131,8 @@ var dead1 = false;
 
 
 document.addEventListener('keydown', function(event) {
-  if (dead1){return};
-  if(event.keyCode == 32 || event.keyCode == 87) {
+  if (dead1 || !started){return};
+  if( event.keyCode == 87|| event.keyCode == 38) {
       if (jumping==false && slipping==false){
         var ranjump = Math.floor(Math.random() * (2));
         jumping = true;
@@ -1136,7 +1144,8 @@ document.addEventListener('keydown', function(event) {
   
   }
 
-  if(event.keyCode == 65) {
+  if(event.keyCode == 65 || event.keyCode ==37 ) {
+    if (dead1 || !started){return};
     if (pos > -1 && moving == false){
       var ran = Math.floor(Math.random() * (4));
       moving = true;
@@ -1150,7 +1159,8 @@ document.addEventListener('keydown', function(event) {
 
     }
   }
-  if(event.keyCode == 68 && moving == false ) {
+  if(event.keyCode == 68 || event.keyCode ==39  ) {
+    if (dead1 || !started){return};
       if (pos < 1 && moving == false){
         var ran = Math.floor(Math.random() * (4));
         moving = true;
@@ -1165,7 +1175,8 @@ document.addEventListener('keydown', function(event) {
       }
   
   }
-  if(event.keyCode == 83) {
+  if(event.keyCode == 83|| event.keyCode ==40 ) {
+    if (dead1 || !started){return};
     var ran = Math.floor(Math.random() * (2));
     if (slipping == false && jumping==false){
       slipping = true;
@@ -1470,7 +1481,7 @@ function run(){
     //controls
 }
 
-run()
+
 
 //-----------------------------
 //------------JUMP-------------
@@ -1520,7 +1531,7 @@ function slip(){
     createjs.Tween.get(camera.position).to({y:camera.position.y - 100}, interval/2).to({y:camera.position.y}, interval/2);
     createjs.Tween.get(camera2.position).to({y:camera2.position.y - 100}, interval/2).to({y:camera2.position.y}, interval/2);
 
-    createjs.Tween.get(waistMesh.position).to({y:-60}, interval/2).to({y:0},interval/4);
+    createjs.Tween.get(waistMesh.position).to({y:-85}, interval/2).to({y:0},interval/4);
     createjs.Tween.get(waistMesh.rotation).to({x:radians(-90)}, interval/2).to({x:radians(0)},interval/2);
     createjs.Tween.get(torso.rotation).to({x:radians(30)}, interval/2).to({x:radians(0)},interval/2);
     createjs.Tween.get(hipsMesh.rotation).to({x:radians(-80)}, interval/2).to({x:radians(0)},interval/2);
@@ -1644,7 +1655,7 @@ function dead(){
   createjs.Tween.get(kneeMesh2.rotation,{override:true}).to({x:radians(0)}, interval/2);
   createjs.Tween.get(ankleMesh.rotation,{override:true}).to({x:radians(0)}, interval/2);
   createjs.Tween.get(ankleMesh2.rotation,{override:true}).to({x:radians(0)}, interval/2);
-  createjs.Tween.get(torso.rotation,{override:true}).to({x:radians(60)}, interval);
+  createjs.Tween.get(torso.rotation,{override:true}).to({x:radians(75)}, interval);
   createjs.Tween.get(shoulderMesh.rotation,{override:true}).to({x:radians(-75)}, interval);
   createjs.Tween.get(shoulderMesh2.rotation,{override:true}).to({x:radians(-75)}, interval);
   createjs.Tween.get(elbowMesh.rotation,{override:true}).to({x:radians(0)}, interval/2);
@@ -1657,12 +1668,42 @@ function dead(){
 
 
 
-  createjs.Tween.get(waistMesh.position,{override:true}).to({y:-28}, interval/2);
+  createjs.Tween.get(waistMesh.position,{override:true}).to({y:-35}, interval/2);
   createjs.Tween.get(kneeMesh.rotation,{override:true}).to({x:radians(120)}, interval/2);
   createjs.Tween.get(kneeMesh2.rotation,{override:true}).to({x:radians(120)}, interval/2);
 
 
 }
+//##################################################START###############################################################
+
+function startPosition(){
+ waistMesh.position.y -= 35;
+ kneeMesh.rotation.x = radians(120);
+ kneeMesh2.rotation.x = radians(120);
+ hipsMesh2.rotation.x = radians(-60);
+ ankleMesh2.rotation.x = radians(-60);
+ shoulderMesh.rotation.x = radians(-90);
+ shoulderMesh2.rotation.x = radians(-90);
+ elbowMesh.rotation.x = radians(0);
+ elbowMesh2.rotation.x = radians(0);
+ torso.rotation.x = radians(70);
+}
+
+
+function startRunning(){
+  var interval = 700;
+  createjs.Tween.get(waistMesh.position,{override:true}).to({y:0}, interval);
+  createjs.Tween.get(kneeMesh.rotation,{override:true}).to({x:radians(0)}, interval);
+  createjs.Tween.get(kneeMesh2.rotation,{override:true}).to({x:radians(0)}, interval);
+ createjs.Tween.get(hipsMesh.rotation,{override:true}).to({x:radians(0)}, interval);
+ createjs.Tween.get(hipsMesh2.rotation,{override:true}).to({x:radians(0)}, interval);
+ createjs.Tween.get(shoulderMesh.rotation,{override:true}).to({x:radians(0)}, interval);
+  createjs.Tween.get(shoulderMesh2.rotation,{override:true}).to({x:radians(0)}, interval);
+  createjs.Tween.get(elbowMesh.rotation,{override:true}).to({x:radians(-90)}, interval);
+  createjs.Tween.get(elbowMesh2.rotation,{override:true}).to({x:radians(-90)}, interval);
+ createjs.Tween.get(torso.rotation,{override:true}).to({x:radians(0)}, interval).call(run);
+}
+startPosition();
 
 //################################################## FINE A N I M A T I O N S ##################################################
 //####### TIMERS #############//////
@@ -1731,7 +1772,6 @@ function creatOstacoli(){
 
 
 
-var callSpawn = setInterval(creatOstacoli,2000);
 
   var colors = [
     0x82E0AA,
@@ -1759,16 +1799,15 @@ var callSpawn = setInterval(creatOstacoli,2000);
     createSpectator(100,10000,maglietta,mutande,scarpe,type,pos);
   }
 
-  var spectatorSpawn = setInterval(Sspawn,200);
+  
 
   var velocity1 = 25000;
-  var displaySpawn = setInterval(function(){
-    createDisplay(2000,velocity1);
-    createDisplay(-2000,velocity1);
-  },25000);
+  
 
 
-
+  var displaySpawn;
+  var spectatorSpawn;
+  var callSpawn;
 
   function stopspawn() {
     clearInterval(displaySpawn);
@@ -1782,6 +1821,8 @@ var day = false;
 function changeDaytime(type){
   day  = !day;
   if (day){
+    switchLamps(0x101010);
+    
     renderer.setClearColor(0x87ceeb); 
     for (var i=0;i<daylights.length;i++){
       daylights[i].visible=true;
@@ -1791,6 +1832,7 @@ function changeDaytime(type){
     }
   }
   else{
+    switchLamps(0xFFFFFF)
     renderer.setClearColor(0x131862); 
     for (var i=0;i<daylights.length;i++){
       daylights[i].visible=false;
@@ -1804,20 +1846,7 @@ function changeDaytime(type){
 //var obstacles = []
 //var highobstacles = []
 
-function removeObstacles(){
-  for (var i=0; i<spectators.length;i++){
-    scene.remove(spectators[i]);
-  }
-  for (var i=0; i<obstacles.length;i++){
-    scene.remove(obstacles[i]);
-  }
-  for (var i=0; i<highobstacles.length;i++){
-    scene.remove(highobstacles[i]);
-  }
-  obstacles = [];
-  highobstacles = [];
-  
-}
+
 
 
 
@@ -1848,6 +1877,31 @@ function findGetParameter(parameterName) {
 
 
 
+function startgame(){
+  if (started==false){
+   callSpawn = setInterval(creatOstacoli,2000);
+   spectatorSpawn = setInterval(Sspawn,200);
+  createDisplay(2000,25000);
+  createDisplay(-2000,25000);
+
+  displaySpawn= setInterval(function(){
+    createDisplay(2000,velocity1);
+    createDisplay(-2000,velocity1);
+  },25000);
+  startRunning();
+  run();
+  createjs.Tween.get(bannerMesh.position,{loop:-1}).to({z:bannerMesh.position.z-5000},4000);
+  createjs.Tween.get(bannerMesh2.position,{loop:-1}).to({z:bannerMesh2.position.z-5000},4000);
+  createjs.Tween.get(groundtexture.offset,{loop:-1}).to({y:groundtexture.offset.y-20}, 50).to({y:groundtexture.offset.y+20}, 50);
+  createjs.Tween.get(texture.offset,{loop:-1}).to({y:texture.offset.y-20}, 50).to({y:texture.offset.y+20}, 50);
+createjs.Tween.get(texture1.offset,{loop:-1}).to({y:texture1.offset.y-20}, 50).to({y:texture1.offset.y+20}, 50);
+createjs.Tween.get(texture2.offset,{loop:-1}).to({y:texture2.offset.y-20}, 50).to({y:texture2.offset.y+10}, 50);
+  started = true;
+}
+}
+
+
+
 
 var obj = {
   god_mode: false,
@@ -1864,6 +1918,8 @@ var obj = {
 
 
   Restart: restart,
+
+  Start: startgame,
   
 
   change_day_time: changeDaytime,
@@ -1898,7 +1954,7 @@ if (g!=null){
   }
 }
 changeDaytime();
-console.log(day);
+
 
 
 
@@ -1912,6 +1968,7 @@ gui.add(obj, 'god_mode');
 gui.add(obj, 'first_person');
 gui.add(obj, 'change_day_time');
 gui.add(obj,'Restart');
+gui.add(obj,'Start')
 var f1 = gui.addFolder('Customize Outfit');
 f1.addColor(obj, 'jersey');
 f1.addColor(obj, 'pants');
@@ -1932,10 +1989,12 @@ function updateOutfit(){
   footMaterial2.color.setHex(obj.shoes);
 
 
+
+
 }
 
 function updateStadium(){
-  if (!dead1){
+  if (!dead1 && started){
     stadiumTexture.offset.x +=0.001;
     stadium2Texture.offset.x -=0.001;
   }
